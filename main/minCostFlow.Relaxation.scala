@@ -40,7 +40,7 @@ object Relaxation {
 
         val choicePenalty = Seq(0, 3, 6, 5000) // nobody wants to go through hell
         val groupCapacity = Seq(50, 10, 10, 10)
-        val groupSizeCost = Seq( 0,  2, 15, 45)
+        val groupSizeCost = Seq( 0, 15, 30, 90)
 
         val file = new java.io.File(getClass.getResource("").getPath,
           "../../../../data/group-prefs-2014.txt")
