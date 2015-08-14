@@ -38,9 +38,10 @@ object Relaxation {
 
         val timeInit = now
 
-        val choicePenalty = Seq(0, 3, 6, 5000) // nobody wants to go through hell
+        val choicePenalty = Seq(0, 3, 6)
         val groupCapacity = Seq(50, 10, 10, 10)
         val groupSizeCost = Seq( 0, 15, 30, 90)
+        val grouplessCost = 5000
 
         val file = new java.io.File(getClass.getResource("").getPath,
           "../../../../data/group-prefs-2014.txt")
@@ -49,49 +50,25 @@ object Relaxation {
         val students = line.next().filter(_.isDigit).toInt
         val tutors   = line.next().filter(_.isDigit).toInt
 
-        val studentSupply: Supply = Vector.fill(students)(1)
-        val tutorSupply  : Supply = Vector.fill(tutors  )(0)
-        val sortingSupply: Supply = Vector(0, 0, 0, 0) // good, okay, bad, evil
-                                    // or: Gryphindor, Ravenclaw, Hufflepuff, Slytherine
-        val hellSupply   : Supply = Vector(0)
-        val goalSupply   : Supply = Vector(-students)
-        val supply = studentSupply ++ tutorSupply ++ sortingSupply ++ hellSupply ++ goalSupply
-
-        val tutorIndices = Range(students, students + tutors).toVector
-
-        val List(good, okay, bad, evil, hell, goal) = Range(students + tutors, supply.size).toList
-        val sorts = Vector(good, okay, bad, evil)
-        assert(sorts.size == groupSizeCost.size)
-        assert(sorts.size == groupCapacity.size)
-
         val preferences: IndexedSeq[Seq[Vertex]] =
           Vector.fill(students) {
-            val prefs = (line.next().split(Array(' ', '\t')).map(_.toInt + students): Seq[Vertex]) :+ hell
+            val prefs = (line.next().split(Array(' ', '\t')).map(_.toInt + students): Seq[Vertex])
             assert(prefs.size == choicePenalty.size)
             prefs
           }
 
         report(timeInit, "initialization and IO")
+
         val timeConstruct = now()
 
-        val prefEdges: Edges = for {
-          (pref, i) <- preferences.zipWithIndex
-          j         <- pref
-        } yield (i, j)
-        val prefCapa: Capacity = prefEdges.map(_ => 1)
-        val prefCost: Cost     = preferences.flatMap(_ => choicePenalty) // includes cost of hell
+        val graph = graphMaker.FlexibleTutors(
+          tutors, preferences, choicePenalty, groupCapacity, groupSizeCost, grouplessCost)
+        import graph._
 
-        val sortEdges: Edges    = for { tutor <- tutorIndices ; sort <- sorts } yield (tutor, sort)
-        val sortCapa : Capacity = tutorIndices.flatMap(_ => groupCapacity)
-        val sortCost : Cost     = tutorIndices.flatMap(_ => groupSizeCost)
-
-        val goalEdges: Edges    = for { i <- Vector(good, okay, bad, evil, hell) } yield (i, goal)
-        val goalCapa : Capacity = goalEdges.map(_ => students)
-        val goalCost : Cost     = goalEdges.map(_ => 0)
-
-        val edges    = prefEdges ++ sortEdges ++ goalEdges
-        val capacity = prefCapa  ++ sortCapa  ++ goalCapa
-        val cost     = prefCost  ++ sortCost  ++ goalCost
+        val List(good, okay, bad, evil, hell, goal) = Range(students + tutors, supply.size).toList
+        val sorts = Vector(good, okay, bad, evil)
+        assert(sorts.size == groupSizeCost.size)
+        assert(sorts.size == groupCapacity.size)
 
         report(timeConstruct, "graph construction")
 
@@ -101,7 +78,7 @@ object Relaxation {
 
         println()
 
-        val choices = choicePenalty.size
+        val choices = augChoicePenalty.size
         assert(choices == 4)
         def frstChoice(s: Vertex): Edge = choices * s
         def scndChoice(s: Vertex): Edge = choices * s + 1
@@ -123,7 +100,7 @@ object Relaxation {
 
         println()
 
-        val goalEdgeIndices = Range(prefEdges.size + sortEdges.size, edges.size).toList
+        val goalEdgeIndices = Range(prefEdges.size + bracEdges.size, edges.size).toList
         val goalEdgeFlows   =  goalEdgeIndices.map(flow)
         val List(goodGoal, okayGoal, badGoal, evilGoal, hellGoal) = goalEdgeIndices
         val List(goodFlow, okayFlow, badFlow, evilFlow, hellFlow) = goalEdgeFlows
@@ -137,7 +114,7 @@ object Relaxation {
 
         println()
 
-        val groupSizes = tutorIndices.map { tutor =>
+        val groupSizes = groupIndices.map { tutor =>
           prefEdges.zipWithIndex.filter({
             case ((i, j), e) => j == tutor && flow(e) == 1
           }).size
