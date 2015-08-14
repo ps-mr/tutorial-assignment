@@ -18,30 +18,110 @@ object Relaxation {
 
   // test run
   def main(args: Array[String]): Unit = {
-    // empty instance
-    println("empty vector == " + computeFlow(
-      supply   = Vector.empty,
-      edges    = Vector.empty,
-      cost     = Vector.empty,
-      capacity = Vector.empty
-    ))
+    args.toList match {
+      case List("data") =>
+        val file = new java.io.File(getClass.getResource("").getPath,
+          "../../../../data/group-prefs-2014.txt")
 
-    /*
-    // simple instance
-    println("10 == " + computeFlow(
-      supply   = Vector(10, -10),
-      edges    = Vector((0, 1)),
-      cost     = Vector(10),
-      capacity = Vector(10)
-    ))
-     */
+        val source = io.Source.fromFile(file)
+        // val students =
+        // run real benchmark
 
-    println("(10, 10) == " + computeFlow(
-      supply   = Vector(10, 0, -10),
-      edges    = Vector((0, 1), (1, 2)),
-      cost     = Vector(10, 10),
-      capacity = Vector(10, 10)
-    ))
+      case List("random", numberOfVertices, outNeighbs) =>
+
+        // seems to generate invalid instances sometimes
+
+        val n             = numberOfVertices.toInt
+        val supplyCeiling = 21 // capacity of all edges
+        val costCeiling   = 51 // maximum cost + 1
+        val outNeighbors  = outNeighbs.toInt
+        val penalty       = 2000 // cost for non-assigned vertices
+
+        import scala.util.Random
+        def now() = java.util.Calendar.getInstance.getTimeInMillis
+        println(s"Generating random graph of $n vertices")
+        val startGraphGeneration = now()
+
+        val firstHalf  = Array.fill(n / 2) { Random.nextInt(supplyCeiling) }
+        val secondHalf = firstHalf.map(- _)
+        val validNodes = firstHalf ++ secondHalf
+        val valids     = validNodes.size
+
+        val supply: Supply = validNodes :+ 0
+
+        val validEdges: Edges =
+          validNodes.zipWithIndex.flatMap {
+            case (_, i) =>
+              Set((for {
+                _ <- Range(0, outNeighbors)
+                j = Random.nextInt(validNodes.size)
+                if i != j
+              }
+              yield (i, j)): _*)
+          }
+
+        val badEdges: Edges = Range(0, valids).flatMap(i => List((valids, i), (i, valids)))
+
+        val edges: Edges = validEdges ++ badEdges
+
+        val cost: Cost =
+          validEdges.map(_ => Random.nextInt(costCeiling)) ++ badEdges.map(_ => penalty)
+
+        val capacity: Capacity = Vector.fill(edges.size)(supplyCeiling)
+
+        println(f"Graph generated in ${now - startGraphGeneration}%6d ms")
+
+        val startCompute = now()
+        computeFlow(supply, edges, cost, capacity)
+        println(f"Flow computed   in ${now - startCompute}%6d ms")
+
+      case _ =>
+        // empty instance
+        println("empty vector == " + computeFlow(
+          supply   = Vector.empty,
+          edges    = Vector.empty,
+          cost     = Vector.empty,
+          capacity = Vector.empty
+        ))
+
+        // simple instance
+        println("(10)         == " + computeFlow(
+          supply   = Vector(10, -10),
+          edges    = Vector((0, 1)),
+          cost     = Vector(10),
+          capacity = Vector(10)
+        ))
+
+        // simple 3-vertex instance
+        println("(10, 10)     == " + computeFlow(
+          supply   = Vector(10, 0, -10),
+          edges    = Vector((0, 1), (1, 2)),
+          cost     = Vector(10, 10),
+          capacity = Vector(10, 10)
+        ))
+
+        // 3-vertex instance with choice
+        println("(0, 1, 1)    == " + computeFlow(
+          supply   = Vector(1, 0, -1),
+          edges    = Vector((0, 2), (0, 1), (1, 2)),
+          cost     = Vector(20, 5, 5),
+          capacity = Vector(1, 1, 1)
+        ))
+
+        // http://www.iwr.uni-heidelberg.de/groups/comopt/teaching/ws10/effAlgI/ueb/fernandez_mincostflow.pdf
+        // slide 53: problem instance
+        // slide 56: optimal flow
+        // vertex number = vertex number in slide - 1
+        // edge number   = starting from leftmost vertex: NE, SE;
+        //                     return to leftmost vertex: SE
+        //                      return to topmost vertex: S, NE
+        println("2,0,2,2,4    == " + computeFlow(
+          supply   = Vector(4, 0, 0, -4),
+          edges    = Vector((0,1), (1,3), (0,2), (1,2), (2,3)),
+          cost     = Vector(  2  ,   3  ,   2  ,   1  ,   1  ),
+          capacity = Vector(  4  ,   3  ,   2  ,   2  ,   5  )
+        ))
+    }
   }
 
   def computeFlow(supply: Supply, edges: Edges, cost: Cost, capacity: Capacity): Flow = {
@@ -73,20 +153,6 @@ object Relaxation {
         startingVertex = startingVertex
       )
 
-      //DEBUG
-      println()
-      println("making singleton tree")
-      println(s"node = ${excessTree.treeNodes}")
-      println(s"cut  = ${excessTree.cut}")
-      println(s"e/r  = (${excessTree.totalExcess}, ${excessTree.potentialResidual})")
-      println(s"pi   = ${excessTree.potential}")
-      println(s"x    = ${excessTree.flow}")
-      println(s"e    = ${excessTree.excess}")
-      println(s"c_pi = ${excessTree.reducedCost}")
-
-      println()
-
-
       // priority potential adjustment
       if (excessTree.totalExcess > excessTree.potentialResidual) {
         val (_potential, _flow, _excess, _reducedCost) = adjustPotential(excessTree, supply, cost)
@@ -95,28 +161,10 @@ object Relaxation {
       else {
 
         while({
-          excessTree.expansion match {
-            case Some(newExcessTree) =>
-              excessTree = newExcessTree
-              excessTree.totalExcess <= excessTree.potentialResidual
-
-            case None =>
-              false
-          }
+          val expansion = excessTree.expansion
+          excessTree = expansion.get
+          expansion.shouldContinue
         }) ()
-
-        //DEBUG
-        println()
-        println("fully grown tree")
-        println(s"node = ${excessTree.treeNodes}")
-        println(s"cut  = ${excessTree.cut}")
-        println(s"e/r  = (${excessTree.totalExcess}, ${excessTree.potentialResidual})")
-        println(s"pi   = ${excessTree.potential}")
-        println(s"x    = ${excessTree.flow}")
-        println(s"e    = ${excessTree.excess}")
-        println(s"c_pi = ${excessTree.reducedCost}")
-        println()
-
 
         if (excessTree.totalExcess > excessTree.potentialResidual) {
           val (_potential, _flow, _excess, _reducedCost) = adjustPotential(excessTree, supply, cost)
@@ -161,62 +209,15 @@ object Relaxation {
 
     val reducedCost = computeReducedCost(cost, old.edges, potential)
 
-
-    //DEBUG
-    println()
-    println(s"adjusting potential")
-    println(s"potential   = $potential")
-    println(s"flow        = $flow")
-    println(s"excess      = $excess")
-    println(s"reducedCost = $reducedCost")
-    println()
-    println(s"oldential   = ${old.potential}")
-    println(s"oldflow     = ${old.flow}")
-    println(s"oldexcess   = ${old.excess}")
-    println(s"oldRecdCost = ${old.reducedCost}")
-    println()
-    println(s"treeNodes   = ${old.treeNodes}")
-    println(s"cut         = ${old.cut}")
-    println(s"e(S)r(pi,S) = (${old.totalExcess}, ${old.potentialResidual})")
-    println()
-
     (potential, flow, excess, reducedCost)
   }
 
   def adjustFlow(old: ExcessTree, supply: Supply): (Flow, Excess) = {
-
-    //DEBUG
-    println()
-    println("adjusting flow")
-    println(s"node = ${old.treeNodes}")
-    println(s"cut  = ${old.cut}")
-    println(s"e/r  = (${old.totalExcess}, ${old.potentialResidual})")
-    println(s"pi   = ${old.potential}")
-    println(s"x    = ${old.flow}")
-    println(s"e    = ${old.excess}")
-    println(s"c_pi = ${old.reducedCost}")
-    println(s"s/j  = ${old.firstVertex}, ${old.lastVertex}")
-    println(s"preE = ${old.previousEdge}")
-    println()
-
-
     val path = pathToRoot(old)
-
-    println(s"\ndone computing path: $path\n")//DEBUG
 
     val pathResidualCapacity: List[Int] = path.map(e => old.capacity(e) - old.flow(e))(breakOut)
 
     val delta = (old.excess(old.firstVertex) :: - old.excess(old.lastVertex) :: pathResidualCapacity).min
-
-    //DEBUG
-    println()
-    println("done adjusting flow")
-    println(s"delta = $delta")
-    println(s"excess = ${old.excess}")
-    println(s"treeNodes = ${old.treeNodes}")
-    println(s"(first, last) = (${old.firstVertex}, ${old.lastVertex})")
-    println(s"(e(S), r(pi, S)) = (${old.totalExcess}, ${old.potentialResidual})")
-    println()
 
     assert(delta > 0)
 
@@ -233,7 +234,6 @@ object Relaxation {
     var v    = excessTree.lastVertex
 
     while ({
-      println("ONCE")//DEBUG
       excessTree.previousEdge.get(v) match {
         case Some(e) =>
           v = getSource(e, excessTree.edges)
@@ -280,6 +280,14 @@ object Relaxation {
     }
   }
 
+  sealed trait TreeExpansion { def shouldContinue: Boolean ; def get: ExcessTree }
+  case class Success(get: ExcessTree) extends TreeExpansion {
+    def shouldContinue = get.totalExcess <= get.potentialResidual
+  }
+  case class Failure(get: ExcessTree) extends TreeExpansion {
+    def shouldContinue = false
+  }
+
   case class ExcessTree(
     edges             : Edges,
     excess            : Excess,
@@ -299,7 +307,8 @@ object Relaxation {
 
     // postcondition: if result is None, then the candidate edge's target
     //                has negative excess (or, it has a deficit).
-    def expansion: Option[ExcessTree] = {
+    def expansion: TreeExpansion = {
+
       // find an arc in the cut in the residual network with reduced cost 0
       val candidate = cut.find {
         case e =>
@@ -313,13 +322,13 @@ object Relaxation {
       val e = candidate.get
 
       if (excess(getTarget(e, edges)) >= 0)
-          Some(addEdge(e))
+          Success(addNodeAndEdge(e))
       else
-          None
+          Failure(addEdge(e))
     }
 
     // precondition: getTarget(e, edges) has nonnegative excess and is outside treeNodes
-    def addEdge(e: Int): ExcessTree = {
+    def addNodeAndEdge(e: Int): ExcessTree = {
       val target          = getTarget(e, edges)
       val newTreeNodes    = treeNodes + target
       val newCut          = computeCut(newTreeNodes, edges)
@@ -329,7 +338,15 @@ object Relaxation {
         totalExcess       = totalExcess + excess(target),
         cut               = newCut,
         potentialResidual = computePotentialResidual(newCut, reducedCost, flow, capacity),
-        firstVertex       = this.firstVertex,
+        lastVertex        = target
+      )
+    }
+
+    // precondition: getTarget(e, edges) has negative excess
+    def addEdge(e: Int): ExcessTree = {
+      val target = getTarget(e, edges)
+      copy (
+        previousEdge      = previousEdge.updated(target, e),
         lastVertex        = target
       )
     }
@@ -378,11 +395,8 @@ object Relaxation {
 
     // edges are between existing vertices
     if (m > 0)
-      assert(
-        edges.map({
-          case (i, j) => 0 <= i & i < n & 0 <= j & j < n
-        }).min
-      )
+      for ((i, j) <- edges) if (! (0 <= i & i < n & 0 <= j & j < n))
+        sys.error(s"bad edge: $i $j")
 
     // costs are attached to existing edges
     assert(m == cost.length)
