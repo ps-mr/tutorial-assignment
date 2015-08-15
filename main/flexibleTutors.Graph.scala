@@ -105,8 +105,6 @@ case class Graph (
       students      = students,
       groups        = groups,
       choices       = choicePenalty.size,
-      groupBrackets = groupBrackets,
-      hell          = hell,
       edges         = edges,
       flow          = computeFlow(supply, edges, cost, capacity)
     )

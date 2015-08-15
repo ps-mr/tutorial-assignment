@@ -8,24 +8,9 @@ case class Report (
   /** number of students                          */ students      : Int,
   /** number of groups                            */ groups        : Int,
   /** number of choices excluding hell            */ choices       : Int,
-  /** bracket sizes of marginal tax on group size */ groupBrackets : Seq[Int],
-  /** the vertex of hell, for sanity check        */ hell          : Vertex,
   /** edges of the flexibleTutors graph           */ edges         : Edges,
   /** minimum cost flow                           */ flow          : Flow
 ) {
-  val goal     = hell + 1
-  val brackets = groupBrackets.size
-
-  // sanity size
-  assert(hell == students + groups + brackets)
-  assert(edges.size == flow.size)
-  assert(edges.size ==
-    students * choices + // preferences of students and edges to hell
-    groups * brackets +  // groups to their tax brackets
-    brackets +           // brackets to goal
-    students + 1         // edges through hell
-  )
-
   val outDegree = choices + 1
 
   //val prefEdges = flow.slice(0, outDegree * students)
