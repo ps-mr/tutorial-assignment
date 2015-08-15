@@ -13,9 +13,6 @@ case class Report (
 ) {
   val outDegree = choices + 1
 
-  //val prefEdges = flow.slice(0, outDegree * students)
-
-
   /** find out which group a student is assigned to */
   def groupOf(student: Vertex): Option[Int] = {
     Range(outDegree * student, outDegree * (student + 1)).find({
