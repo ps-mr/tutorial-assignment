@@ -73,14 +73,14 @@ object Relaxation {
         reportTime(timeConstruct, "graph construction")
 
         val timeCompute = now
-        val graphReport = graph.report
-        val flow = graphReport.flow
+        val report = graph.computeReport
+        val flow = report.flow
         reportTime(timeCompute, "flow computation")
 
         println()
-        println(graphReport.choiceStatistics)
+        println(report.choiceStatistics)
         println()
-        println(graphReport.groupSizeStatistics(30, 40, 50, 60))
+        println(report.groupSizeStatistics(30, 40, 50, 60))
         println()
 
       case List("random", numberOfVertices, outNeighbs) =>

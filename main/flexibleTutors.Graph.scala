@@ -100,7 +100,7 @@ case class Graph (
   val cost     = prefCost  ++ bracCost  ++ goalCost
 
   /** compute min cost flow and generate a report about it */
-  def report: Report =
+  def computeReport(): Report =
     Report(
       students      = students,
       groups        = groups,
