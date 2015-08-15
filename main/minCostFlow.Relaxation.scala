@@ -52,7 +52,7 @@ object Relaxation {
 
         val preferences: IndexedSeq[Seq[Vertex]] =
           Vector.fill(students) {
-            val prefs = (line.next().split(Array(' ', '\t')).map(_.toInt + students): Seq[Vertex])
+            val prefs = (line.next().split(Array(' ', '\t')).map(_.toInt): Seq[Vertex])
             assert(prefs.size == choicePenalty.size)
             prefs
           }

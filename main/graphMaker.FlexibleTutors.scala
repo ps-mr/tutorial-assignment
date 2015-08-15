@@ -38,7 +38,7 @@ case class FlexibleTutors (
   assert(brackets.size == groupBrackets.size)
 
   // preferences augmented with hell
-  val augPreferences = preferences.map(_ :+ hell)
+  val augPreferences = preferences.map(_.map(_ + students) :+ hell)
 
   // cost of choices augmented by distaste for hell
   val augChoicePenalty = choicePenalty :+ grouplessCost
