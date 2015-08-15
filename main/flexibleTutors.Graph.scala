@@ -98,4 +98,16 @@ case class Graph (
   val edges    = prefEdges ++ bracEdges ++ goalEdges
   val capacity = prefCapa  ++ bracCapa  ++ goalCapa
   val cost     = prefCost  ++ bracCost  ++ goalCost
+
+  /** compute min cost flow and generate a report about it */
+  def report: Report =
+    Report(
+      students      = students,
+      groups        = groups,
+      choices       = choicePenalty.size,
+      groupBrackets = groupBrackets,
+      hell          = hell,
+      edges         = edges,
+      flow          = computeFlow(supply, edges, cost, capacity)
+    )
 }

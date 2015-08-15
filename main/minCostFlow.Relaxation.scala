@@ -20,7 +20,7 @@ object Relaxation {
   def main(args: Array[String]): Unit = {
     def now() = java.util.Calendar.getInstance.getTimeInMillis
     def elapse(last: Long): String = f"${now - last}%8d ms"
-    def report(last: Long, job: String) = println(s"${elapse(last)}  $job")
+    def reportTime(last: Long, job: String) = println(s"${elapse(last)}  $job")
 
     def percent(numerator: Int, denominator: Int, thing: String) = {
       val percent =
@@ -57,7 +57,7 @@ object Relaxation {
             prefs
           }
 
-        report(timeInit, "initialization and IO")
+        reportTime(timeInit, "initialization and IO")
 
         val timeConstruct = now()
 
@@ -70,70 +70,17 @@ object Relaxation {
         assert(sorts.size == groupSizeCost.size)
         assert(sorts.size == groupCapacity.size)
 
-        report(timeConstruct, "graph construction")
+        reportTime(timeConstruct, "graph construction")
 
         val timeCompute = now
-        val flow = computeFlow(supply, edges, cost, capacity)
-        report(timeCompute, "flow computation")
+        val graphReport = graph.report
+        val flow = graphReport.flow
+        reportTime(timeCompute, "flow computation")
 
         println()
-
-        val choices = augChoicePenalty.size
-        assert(choices == 4)
-        def frstChoice(s: Vertex): Edge = choices * s
-        def scndChoice(s: Vertex): Edge = choices * s + 1
-        def thrdChoice(s: Vertex): Edge = choices * s + 2
-        def hellChoice(s: Vertex): Edge = choices * s + 3
-
-        val guys        = Range(0, students)
-        val happy       = guys.count(s => flow(frstChoice(s)) == 1)
-        val sad         = guys.count(s => flow(scndChoice(s)) == 1)
-        val wretched    = guys.count(s => flow(thrdChoice(s)) == 1)
-        val heartbroken = guys.count(s => flow(hellChoice(s)) == 1)
-
-        assert(happy + sad + wretched + heartbroken == students)
-
-        percent(      happy, students, "assigned to 1st choice")
-        percent(        sad, students, "assigned to 2nd choice")
-        percent(   wretched, students, "assigned to 3rd choice")
-        percent(heartbroken, students, "unassigned")
-
+        println(graphReport.choiceStatistics)
         println()
-
-        val goalEdgeIndices = Range(prefEdges.size + bracEdges.size, edges.size).toList
-        val goalEdgeFlows   =  goalEdgeIndices.map(flow)
-        val List(goodGoal, okayGoal, badGoal, evilGoal, hellGoal) = goalEdgeIndices
-        val List(goodFlow, okayFlow, badFlow, evilFlow, hellFlow) = goalEdgeFlows
-        val goalFlow = goalEdgeFlows.sum
-        assert(goalFlow == students)
-
-        percent(goodFlow, goalFlow, "students in groups of 50 or fewer")
-        percent(okayFlow, goalFlow, "students in groups of size 51--60")
-        percent( badFlow, goalFlow, "students in groups of size 61--70")
-        percent(evilFlow, goalFlow, "students in groups of size 71--80")
-
-        println()
-
-        val groupSizes = groupIndices.map { tutor =>
-          prefEdges.zipWithIndex.filter({
-            case ((i, j), e) => j == tutor && flow(e) == 1
-          }).size
-        }
-        assert(groupSizes.sum == students - heartbroken)
-
-        val groups     = groupSizes.count(g =>  g != 0)
-        val goodGroups = groupSizes.count(g =>  1 <= g & g <= 50)
-        val okayGroups = groupSizes.count(g => 51 <= g & g <= 60)
-        val  badGroups = groupSizes.count(g => 61 <= g & g <= 70)
-        val evilGroups = groupSizes.count(g => 71 <= g & g <= 80)
-
-        assert(goodGroups + okayGroups + badGroups + evilGroups == groups)
-
-        percent(goodGroups, groups, "groups of 50 or fewer")
-        percent(okayGroups, groups, "groups of size 51--60")
-        percent( badGroups, groups, "groups of size 61--70")
-        percent(evilGroups, groups, "groups of size 71--80")
-
+        println(graphReport.groupSizeStatistics(30, 40, 50, 60))
         println()
 
       case List("random", numberOfVertices, outNeighbs) =>
