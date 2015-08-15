@@ -61,7 +61,7 @@ object Relaxation {
 
         val timeConstruct = now()
 
-        val graph = graphMaker.FlexibleTutors(
+        val graph = flexibleTutors.Graph(
           tutors, preferences, choicePenalty, groupCapacity, groupSizeCost, grouplessCost)
         import graph._
 
