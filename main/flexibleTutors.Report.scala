@@ -5,11 +5,11 @@ import minCostFlow.Relaxation._
 import collection.mutable.MutableList
 
 case class Report (
-  /** number of students                          */ students      : Int,
-  /** number of groups                            */ groups        : Int,
-  /** number of choices excluding hell            */ choices       : Int,
-  /** edges of the flexibleTutors graph           */ edges         : Edges,
-  /** minimum cost flow                           */ flow          : Flow
+  /** number of students                */ students : Int,
+  /** number of groups                  */ groups   : Int,
+  /** number of choices excluding hell  */ choices  : Int,
+  /** edges of the flexibleTutors graph */ edges    : Edges,
+  /** minimum cost flow                 */ flow     : Flow
 ) {
   val outDegree = choices + 1
 
