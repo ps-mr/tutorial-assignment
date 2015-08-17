@@ -102,10 +102,10 @@ case class Graph (
   /** compute min cost flow and generate a report about it */
   def computeReport(): Report =
     Report(
-      students      = students,
-      groups        = groups,
-      choices       = choicePenalty.size,
-      edges         = edges,
-      flow          = computeFlow(supply, edges, cost, capacity)
+      students = students,
+      groups   = groups,
+      choices  = choicePenalty.size,
+      edges    = edges,
+      flow     = computeFlow(supply, edges, cost, capacity)
     )
 }
