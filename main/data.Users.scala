@@ -8,15 +8,19 @@ object Users {
     val users = "users"
   }
 
-  def apply(jsonCode: String): Users = new Users (
-    jsonCode.parseJson.asJsObject.fields.toList match {
-      case List((Field.users, JsArray(elements))) =>
-        elements.map(_.convertTo[Student])
+  def apply(jsonCode: String): Users = new Users({
+    def error() = deserializationError(s"""expect {"${Field.users}":[ students... ]}""")
+    jsonCode.parseJson match {
+      case JsObject(fields) => fields(Field.users) match {
+        case JsArray(elements) =>
+          elements.map(_.convertTo[Student])
 
-      case _ =>
-        deserializationError(s"""expect {"${Field.users}":[ students... ]}""")
+        case _ => error()
+      }
+
+      case _ => error()
     }
-  )
+  })
 }
 
 
