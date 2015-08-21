@@ -6,7 +6,7 @@ object Student extends DefaultJsonProtocol {
   /** configurable field names */
   object Field {
     val id      = "id"
-    val choices = Seq("first_choice", "second_choice", "third_choice")
+    val choices = (1 to 5).map("choice" + _)
   }
 
 
