@@ -1,22 +1,9 @@
 package minCostFlow
 
 import collection._
+import Graph._
 
 object Relaxation {
-
-  type Vertex       = Int
-  type Vertices     = IndexedSeq[Vertex]
-  type Edge         = Int
-  type Supply       = IndexedSeq[Int]
-  type Edges        = IndexedSeq[(Vertex, Vertex)]
-  type CostValue    = Int
-  type Cost         = IndexedSeq[CostValue]
-  type ReducedCost  = Cost
-  type Capacity     = IndexedSeq[Int]
-  type Flow         = IndexedSeq[Int]
-  type Potential    = IndexedSeq[Int]
-  type Excess       = IndexedSeq[Int]
-  type Cut          = Seq[Int]
 
   def computeFlow(supply: Supply, edges: Edges, cost: Cost, capacity: Capacity): Flow = {
 
@@ -279,9 +266,6 @@ object Relaxation {
 
     excess
   }
-
-  def getSource(edge: Edge, edges: IndexedSeq[(Vertex, Vertex)]): Vertex = edges(edge)._1
-  def getTarget(edge: Edge, edges: IndexedSeq[(Vertex, Vertex)]): Vertex = edges(edge)._2
 
   def verifyMinCostInstance(supply: Supply, edges: Edges, cost: Cost, capacity: Capacity): Unit = {
     val n = supply.length // number of vertices

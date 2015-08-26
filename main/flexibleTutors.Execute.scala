@@ -1,7 +1,7 @@
 /** sort last year's students into groups using flexibleTutors graph */
 package flexibleTutors
 
-import minCostFlow.Relaxation._
+import minCostFlow.Graph._
 
 object Execute {
   def main(args: Array[String]): Unit = {

@@ -1,7 +1,7 @@
 /** Assume possibility to distribute tutors over groups no matter what */
 package flexibleTutors
 
-import minCostFlow.Relaxation._
+import minCostFlow.Graph._
 import collection.mutable.MutableList
 
 case class Report (

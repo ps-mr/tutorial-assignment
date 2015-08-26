@@ -47,7 +47,7 @@
 
 package ballsAndBins
 
-import minCostFlow.Relaxation._
+import minCostFlow.Graph._
 
 object Graph {
   case class BallIntoBin(ball: Vertex, bin: Vertex, cost: CostValue)
@@ -59,7 +59,7 @@ class Graph (
   val marginalRank   : Seq[Int], // bracket size for marginal tax on bin size
   val marginalCost   : Seq[Int],
   val binlessPenalty : Int
-) {
+) extends minCostFlow.Graph {
   import Graph.BallIntoBin
 
   val numberOfBalls: Int = binsForBalls.length
@@ -101,8 +101,5 @@ class Graph (
   val edges    = edgesFromBalls ++ edgesFromBins ++ edgesToSink
   val capacity = capaFromBalls  ++ capaFromBins  ++ capaToSink
   val cost     = costFromBalls  ++ costFromBins  ++ costToSink
-
-  def computeFlow(): Flow =
-    minCostFlow.Relaxation.computeFlow(supply, edges, cost, capacity)
 }
 
