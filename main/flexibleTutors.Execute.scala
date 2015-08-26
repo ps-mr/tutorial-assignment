@@ -44,7 +44,7 @@ object Execute {
 
     val timeConstruct = now()
 
-    val graph = flexibleTutors.Graph(
+    val graph = new flexibleTutors.Graph(
       tutors, preferences, choicePenalty, groupCapacity, groupSizeCost, grouplessCost)
     import graph._
 

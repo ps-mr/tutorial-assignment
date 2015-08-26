@@ -5,10 +5,12 @@ import collection._
 object Relaxation {
 
   type Vertex       = Int
+  type Vertices     = IndexedSeq[Vertex]
   type Edge         = Int
   type Supply       = IndexedSeq[Int]
   type Edges        = IndexedSeq[(Vertex, Vertex)]
-  type Cost         = IndexedSeq[Int]
+  type CostValue    = Int
+  type Cost         = IndexedSeq[CostValue]
   type ReducedCost  = Cost
   type Capacity     = IndexedSeq[Int]
   type Flow         = IndexedSeq[Int]
