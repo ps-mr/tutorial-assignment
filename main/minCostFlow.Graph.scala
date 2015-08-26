@@ -31,7 +31,7 @@ trait Graph {
   val cost     : Cost
   val capacity : Capacity
 
-  def createIntegerProgram(): Unit = {
+  def createIntegerProgram(): (MIProblem, IndexedSeq[MPIntVar]) = {
     import optimus.algebra._
 
     implicit val problem = MIProblem(SolverLib.oJalgo)
@@ -50,11 +50,15 @@ trait Graph {
 
     val supplyConstraints = for {
       v <- 0 until supply.length
-      incomingFlow = (for { ((u, w), i) <- edgesWithIndex ; if u == v } yield flow(i)).fold[Expression](0)(_ + _)
-      outgoingFlow = (for { ((u, w), i) <- edgesWithIndex ; if w == v } yield flow(i)).fold[Expression](0)(_ + _)
+      outgoingFlow = (for { ((u, w), i) <- edgesWithIndex ; if u == v } yield flow(i)).fold[Expression](0)(_ + _)
+      incomingFlow = (for { ((u, w), i) <- edgesWithIndex ; if w == v } yield flow(i)).fold[Expression](0)(_ + _)
     }
     yield outgoingFlow - incomingFlow := supply(v)
 
-    subjectTo(capacityConstraints ++ supplyConstraints: _*)
+    val constraints = capacityConstraints ++ supplyConstraints
+
+    subjectTo(constraints: _*)
+
+    (problem, flow)
   }
 }

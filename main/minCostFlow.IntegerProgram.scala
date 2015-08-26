@@ -5,7 +5,12 @@ import Graph._
 
 object IntegerProgram extends Solver {
   def computeFlow(graph: Graph): Flow = {
-    ???
+    implicit val (problem, flowVars) = graph.createIntegerProgram()
+    start()
+    val objective = objectiveValue
+    val flow = flowVars.map(_.value.get.toInt)
+    release()
+    flow
   }
 
   /** execute mixed integer programming example from Optimus */
