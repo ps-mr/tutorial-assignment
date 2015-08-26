@@ -5,6 +5,15 @@ import minCostFlow.Graph._
 
 object Execute {
   def main(args: Array[String]): Unit = {
+
+    val solver: minCostFlow.Solver = args match {
+      case Array("IntegerProgram") =>
+        minCostFlow.IntegerProgram
+
+      case _ =>
+        minCostFlow.Relaxation
+    }
+
     def now() = java.util.Calendar.getInstance.getTimeInMillis
     def elapse(last: Long): String = f"${now - last}%8d ms"
     def reportTime(last: Long, job: String) = println(s"${elapse(last)}  $job")
@@ -56,7 +65,7 @@ object Execute {
     reportTime(timeConstruct, "graph construction")
 
     val timeCompute = now
-    val report = graph.computeReport(solver = minCostFlow.Relaxation)
+    val report = graph.computeReport(solver = solver)
     val flow = report.flow
     reportTime(timeCompute, "flow computation")
 

@@ -37,12 +37,10 @@ trait Graph {
     implicit val problem = MIProblem(SolverLib.oJalgo)
     val flow: IndexedSeq[MPIntVar] = Range(0, edges.length).map {
       case i =>
-        MPIntVar("flow" + i, 0 to capacity(i))
+        MPIntVar("flow" + i, Range(0, capacity(i) + 1))
     }
 
     val flowWithIndex = flow.zipWithIndex
-
-    minimize { (for ((x, i) <- flowWithIndex) yield x * cost(i)).fold[Expression](0)(_ + _) }
 
     val capacityConstraints = for ((x, i) <- flowWithIndex) yield x <= capacity(i)
 
@@ -57,7 +55,17 @@ trait Graph {
 
     val constraints = capacityConstraints ++ supplyConstraints
 
+    //DEBUG
+    println
+    println("edges = " + edges.slice(36, 40))
+    println("flow = " + flow.slice(36, 40))
+    println(s"supply = ${supply.take(10)}")
+    println(s"constraints\n" + supplyConstraints.take(10).map("  " + _).mkString("\n"))
+    println
+
+    minimize { (for ((x, i) <- flowWithIndex) yield x * cost(i)).fold[Expression](0)(_ + _) }
     subjectTo(constraints: _*)
+
 
     (problem, flow)
   }

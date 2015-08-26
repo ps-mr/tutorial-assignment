@@ -10,6 +10,11 @@ object IntegerProgram extends Solver {
     val objective = objectiveValue
     val flow = flowVars.map(_.value.get.toInt)
     release()
+
+    for { i <- List(36, 37, 38, 39) } {
+      println(s"flow($i) = ${flow(i)}")
+    }
+
     flow
   }
 
