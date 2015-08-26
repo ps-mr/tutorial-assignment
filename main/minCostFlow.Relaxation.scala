@@ -5,6 +5,14 @@ import Graph._
 
 object Relaxation {
 
+  def computeFlow(graph: Graph): Flow =
+    computeFlow (
+      supply   = graph.supply,
+      edges    = graph.edges,
+      cost     = graph.cost,
+      capacity = graph.capacity
+    )
+
   def computeFlow(supply: Supply, edges: Edges, cost: Cost, capacity: Capacity): Flow = {
 
     verifyMinCostInstance(supply, edges, cost, capacity)

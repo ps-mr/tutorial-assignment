@@ -19,6 +19,8 @@ object Graph {
 
   def getSource(edge: Edge, edges: IndexedSeq[(Vertex, Vertex)]): Vertex = edges(edge)._1
   def getTarget(edge: Edge, edges: IndexedSeq[(Vertex, Vertex)]): Vertex = edges(edge)._2
+
+  case class Simple(supply: Supply, edges: Edges, cost: Cost, capacity: Capacity) extends Graph
 }
 
 trait Graph {
