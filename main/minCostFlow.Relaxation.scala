@@ -3,7 +3,7 @@ package minCostFlow
 import collection._
 import Graph._
 
-object Relaxation {
+object Relaxation extends Solver {
 
   def computeFlow(graph: Graph): Flow =
     computeFlow (

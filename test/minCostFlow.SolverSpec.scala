@@ -2,10 +2,15 @@ package minCostFlow
 
 import org.scalatest._
 
-class RelaxationSpec extends FlatSpec {
-  import Relaxation._
+class RelaxationSpec extends SolverSpec(Relaxation)
 
-  "Relaxation" should "handle the empty instance" in {
+
+abstract class SolverSpec(solver: Solver) extends FlatSpec {
+  def solverName: String = solver.getClass.getSimpleName.replaceFirst("\\$$", "")
+
+  import solver.computeFlow
+
+  solverName should "handle the empty instance" in {
     val flow = computeFlow(Instance.empty)
     assert(flow == Instance.emptyFlow)
   }

@@ -1,8 +1,13 @@
 package minCostFlow
 
 import optimus.optimization._
+import Graph._
 
-object IntegerProgram {
+object IntegerProgram extends Solver {
+  def computeFlow(graph: Graph): Flow = {
+    ???
+  }
+
   /** execute mixed integer programming example from Optimus */
   def runExample() {
     implicit val problem = MIProblem(SolverLib.oJalgo)

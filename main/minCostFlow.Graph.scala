@@ -31,9 +31,6 @@ trait Graph {
   val cost     : Cost
   val capacity : Capacity
 
-  def computeFlow(): Flow =
-    minCostFlow.Relaxation.computeFlow(supply, edges, cost, capacity)
-
   def createIntegerProgram(): Unit = {
     import optimus.algebra._
 

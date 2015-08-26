@@ -56,7 +56,7 @@ object Execute {
     reportTime(timeConstruct, "graph construction")
 
     val timeCompute = now
-    val report = graph.computeReport
+    val report = graph.computeReport(solver = minCostFlow.Relaxation)
     val flow = report.flow
     reportTime(timeCompute, "flow computation")
 

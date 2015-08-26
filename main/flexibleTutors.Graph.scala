@@ -50,12 +50,12 @@ class Graph (
   binlessPenalty = grouplessCost
 ) {
   /** compute min cost flow and generate a report about it */
-  def computeReport(): Report =
+  def computeReport(solver: minCostFlow.Solver): Report =
     Report(
       students = numberOfBalls,
       groups   = numberOfBins,
       choices  = choicePenalty.size,
       edges    = edges,
-      flow     = computeFlow()
+      flow     = solver.computeFlow(this)
     )
 }
