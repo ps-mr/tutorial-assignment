@@ -9,8 +9,8 @@ object IntegerProgram extends Solver {
     implicit val (problem, flowVars) = graph.createIntegerProgram()
 
     // tolerance of rounding inaccuracy
-    // is such that every float deviating for this much changes
-    // their sum by less than 0.5
+    // is such that every float deviating for this much
+    // changes their sum by less than 0.5
     val epsilon: Double = 0.25 / flowVars.size
 
     start()
