@@ -65,5 +65,5 @@ object Forum {
     }
   }
 
-  def getUsers(): Users = Users(dump)
+  def getUsers(): Users = Users.fromJson(dump)
 }

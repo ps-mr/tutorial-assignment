@@ -4,14 +4,17 @@ package flexibleTutors
 import minCostFlow.Graph._
 
 object Execute {
+  sealed trait Mode
+  case object Relax extends Mode
+  case object IProg extends Mode
+  case object Activ extends Mode
+
   def main(args: Array[String]): Unit = {
 
-    val solver: minCostFlow.Solver = args match {
-      case Array("IntegerProgram") =>
-        minCostFlow.IntegerProgram
-
-      case _ =>
-        minCostFlow.Relaxation
+    val mode = args match {
+      case Array("IntegerProgram") => IProg
+      case Array("withActivation") => Activ
+      case _                       => Relax
     }
 
     def now() = java.util.Calendar.getInstance.getTimeInMillis
@@ -28,52 +31,65 @@ object Execute {
     }
     println()
 
-    val timeInit = now
+    mode match {
+      case Activ =>
+        val timeInit = now
 
-    val choicePenalty = Seq(0, 3, 6)
-    val groupCapacity = Seq(50, 10, 10, 10)
-    val groupSizeCost = Seq( 0, 15, 30, 90)
-    val grouplessCost = 5000
+        val marginalRank      = Seq(1, 1, 1,  1,  1)
+        val marginalCost      = Seq(1, 3, 6, 10, 15)
+        val unassignedPenalty = 5000
 
-    val file = new java.io.File(getClass.getResource("").getPath,
-      "../../../../data/group-prefs-2014.txt")
+        val users  = data.Users.year2014
+        val rooms  = data.Rooms.dummy
+        val tutors = data.Tutors.dummy
 
-    val line = io.Source.fromFile(file).getLines()
-    val students = line.next().filter(_.isDigit).toInt
-    val tutors   = line.next().filter(_.isDigit).toInt
+        reportTime(timeInit, "initialization and IO")
 
-    val preferences: IndexedSeq[Seq[Vertex]] =
-      Vector.fill(students) {
-        val prefs = (line.next().split(Array(' ', '\t')).map(_.toInt): Seq[Vertex])
-        assert(prefs.size == choicePenalty.size)
-        prefs
-      }
+        val timeConstruct = now()
+        val graph = tutorial.Graph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
 
-    reportTime(timeInit, "initialization and IO")
+        reportTime(timeConstruct, "graph construction")
 
-    val timeConstruct = now()
+        val timeCompute = now
+        val report = graph.computeReport()
 
-    val graph = new flexibleTutors.Graph(
-      tutors, preferences, choicePenalty, groupCapacity, groupSizeCost, grouplessCost)
-    import graph._
+        reportTime(timeCompute, "flow computation")
 
-    val List(good, okay, bad, evil, hell, goal) = Range(students + tutors, supply.size).toList
-    val sorts = Vector(good, okay, bad, evil)
-    assert(sorts.size == groupSizeCost.size)
-    assert(sorts.size == groupCapacity.size)
+      case Relax | IProg =>
 
-    reportTime(timeConstruct, "graph construction")
+        val solver: minCostFlow.Solver = mode match {
+          case Relax => minCostFlow.Relaxation
+          case _     => minCostFlow.IntegerProgram
+        }
 
-    val timeCompute = now
-    val report = graph.computeReport(solver = solver)
-    val flow = report.flow
-    reportTime(timeCompute, "flow computation")
+        val timeInit = now
 
-    println()
-    println(report.choiceStatistics)
-    println()
-    println(report.groupSizeStatistics(30, 40, 50, 60))
-    println()
+        val choicePenalty = Seq(0, 3, 6)
+        val groupCapacity = Seq(50, 10, 10, 10)
+        val groupSizeCost = Seq( 0, 15, 30, 90)
+        val grouplessCost = 5000
 
+        val users = data.Users.year2014
+
+        reportTime(timeInit, "initialization and IO")
+
+
+        val timeConstruct = now()
+
+        val graph = flexibleTutors.Graph(users, choicePenalty, groupCapacity, groupSizeCost, grouplessCost)
+
+        reportTime(timeConstruct, "graph construction")
+
+        val timeCompute = now
+        val report = graph.computeReport(solver = solver)
+        val flow = report.flow
+        reportTime(timeCompute, "flow computation")
+
+        println()
+        println(report.choiceStatistics)
+        println()
+        println(report.groupSizeStatistics(30, 40, 50, 60))
+        println()
+    }
   }
 }

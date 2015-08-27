@@ -35,6 +35,23 @@
   */
 package flexibleTutors
 
+object Graph {
+  def apply(
+    users         : data.Users,
+    choicePenalty : Seq[Int],
+    groupBrackets : Seq[Int],
+    groupSizeCost : Seq[Int],
+    grouplessCost : Int
+  ): Graph = new Graph (
+    groups        = users.groups,
+    preferences   = users.preferences,
+    choicePenalty = choicePenalty,
+    groupBrackets = groupBrackets,
+    groupSizeCost = groupSizeCost,
+    grouplessCost = grouplessCost
+  )
+}
+
 class Graph (
   /** the number of groups                        */ groups        : Int,
   /** array of preferred slots                    */ preferences   : IndexedSeq[Seq[Int]],

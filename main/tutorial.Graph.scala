@@ -33,11 +33,31 @@
   * tutors for.
   */
 
+package tutorial
+
 import minCostFlow.Graph._
 import minCostFlow.withActivation.Graph.Matrix
 
+object Graph {
+  def apply(
+    users             : data.Users,
+    rooms             : data.Rooms,
+    tutors            : data.Tutors,
+    marginalRank      : Seq[Int],
+    marginalCost      : Seq[Int],
+    unassignedPenalty : Int
+  ): Graph = new Graph (
+    roomsPerSlot        = rooms.roomsPerSlot,
+    studentAvailability = users.preferences,
+    tutorAvailability   = tutors.availability,
+    marginalRank        = marginalRank,
+    marginalCost        = marginalCost,
+    unassignedPenalty   = unassignedPenalty
+  )
+}
+
 class Graph (
-  numberOfRooms       : IndexedSeq[Int], // map time slot index to room number
+  roomsPerSlot        : IndexedSeq[Int], // map time slot index to room number
   studentAvailability : IndexedSeq[Seq[Int]],
   tutorAvailability   : IndexedSeq[Seq[Int]],
   marginalRank        : Seq[Int], // does not include first-level rank
@@ -45,7 +65,7 @@ class Graph (
   unassignedPenalty   : Int
 ) extends minCostFlow.withActivation.Graph {
 
-  val numberOfTimeSlots    : Int = numberOfRooms.length
+  val numberOfTimeSlots    : Int = roomsPerSlot.length
   val numberOfStudents     : Int = studentAvailability.length
   val numberOfTutors       : Int = tutorAvailability.length
   def startingTutorialSize : Int = numberOfStudents / numberOfTutors
@@ -80,8 +100,8 @@ class Graph (
 
   val edgesFromSlots =
     for {
-      (slots, tutorIndex) <- tutorAvailability.zipWithIndex
-      slotIndex <- slots
+      (avail, tutorIndex) <- tutorAvailability.zipWithIndex
+      slotIndex <- avail
     }
     yield (slots(slotIndex), tutors(tutorIndex))
 
@@ -117,5 +137,8 @@ class Graph (
     case slot => activationEdges.map(e => if (getSource(e, edges) == slot) 1 else 0)
   })
 
-  val activationLeResult : IndexedSeq[Int] = numberOfRooms
+  val activationLeResult : IndexedSeq[Int] = roomsPerSlot
+
+  def computeReport(): Report =
+    Report(this, minCostFlow.IntegerProgram.computeActivatedFlow(this))
 }

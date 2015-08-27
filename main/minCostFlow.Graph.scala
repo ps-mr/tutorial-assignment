@@ -34,7 +34,7 @@ trait Graph {
   def createIntegerProgram(): (MIProblem, IndexedSeq[MPIntVar]) = {
     import optimus.algebra._
 
-    implicit val problem = MIProblem(SolverLib.oJalgo)
+    implicit val problem = MIProblem(SolverLib.gurobi)
     val flow = Range(0, edges.length).map {
       case i =>
         MPIntVar("flow" + i, Range(0, capacity(i) + 1))

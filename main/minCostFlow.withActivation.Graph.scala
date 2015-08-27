@@ -62,14 +62,23 @@ trait Graph {
     import optimus.algebra._
     import Graph._
 
-    implicit val problem = MIProblem(SolverLib.oJalgo)
+    implicit val problem = MIProblem(SolverLib.gurobi)
 
     val edgeIndices = Range(0, edges.length)
 
-    val flow       = edgeIndices    .map { i => MPIntVar("flow" + i, Range(0, capacity(i) + 1)) }
+    val flow = edgeIndices.map {
+      i => MPIntVar("flow" + i, Range(0, capacity(i) + 1))
+      //i => MPFloatVar("flow" + i, 0, capacity(i))
+    }
     val activation = activationEdges.map { i => MPIntVar("activation" + i, 0 to 1) }
 
-    val capacityConstraints = for (i <- edgeIndices) yield flow(i) <= capacity(i) * activation(i)
+    val capacityConstraints = for (i <- edgeIndices) yield {
+      val activationIndex = activationEdges.indexOf(i)
+      if (activationIndex >= 0)
+        flow(i) <= capacity(i) * activation(activationIndex)
+      else
+        flow(i) <= capacity(i)
+    }
 
     val supplyConstraints = for {
       v <- 0 until supply.length
