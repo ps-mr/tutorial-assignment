@@ -1,7 +1,7 @@
 /** PROBLEM Min-cost-flow-with-activation
   *
   * INSTANCE
-  * Matrix A, vector b, set of edges to be activated,
+  * Matrices E, L, vectors e, l, set of edges to be activated, and
   * Graph where
   * - every edge has a capacity, a binary activation variable, and a cost
   * - every vertex has a supply
@@ -14,11 +14,11 @@
   * and outgoing-flow - incoming-flow == supply, we have the additional
   * constraint that
   *
-  *   A alpha = b,
+  *     E alpha == e      L alpha <= l
   *
   * where alpha is the activation vector,
-  *           A is the coefficient matrix,
-  *           b is the expected result.
+  * E is   equality constraint matrix, b is   equality constraint result,
+  * L is inequality constraint matrix, l is inequality constraint result.
   */
 
 package minCostFlow.withActivation
@@ -50,9 +50,11 @@ trait Graph {
   val cost     : Cost
   val capacity : Capacity
 
-  val activationEdges  : IndexedSeq[Edge]
-  val activationMatrix : Graph.Matrix
-  val activationResult : IndexedSeq[Int]
+  val activationEdges    : IndexedSeq[Edge]
+  val activationEqMatrix : Graph.Matrix
+  val activationEqResult : IndexedSeq[Int]
+  val activationLeMatrix : Graph.Matrix
+  val activationLeResult : IndexedSeq[Int]
 
   /** @return (problem, flow, activation)
     */
@@ -76,12 +78,17 @@ trait Graph {
     }
     yield outgoingFlow - incomingFlow := supply(v)
 
-    assert(activationMatrix.rows == activationResult.length)
-    val activationConstraints = ((activationMatrix * activation), activationResult).zipped.map {
+    assert(activationEqMatrix.rows == activationEqResult.length)
+    val activationEqConstraints = ((activationEqMatrix * activation), activationEqResult).zipped.map {
       case (lhs, rhs) => lhs := rhs
     }
 
-    val constraints = capacityConstraints ++ supplyConstraints ++ activationConstraints
+    assert(activationLeMatrix.rows == activationLeResult.length)
+    val activationLeConstraints = ((activationLeMatrix * activation), activationLeResult).zipped.map {
+      case (lhs, rhs) => lhs <= rhs
+    }
+
+    val constraints = capacityConstraints ++ supplyConstraints ++ activationEqConstraints ++ activationLeConstraints
 
     minimize { (for (i <- edgeIndices) yield flow(i) * cost(i)).fold[Expression](0)(_ + _) }
     subjectTo(constraints: _*)
