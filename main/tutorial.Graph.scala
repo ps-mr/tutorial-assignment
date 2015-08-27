@@ -35,8 +35,9 @@
 
 package tutorial
 
+import optimus.optimization._
+import optimus.algebra.Expression
 import minCostFlow.Graph._
-import minCostFlow.withActivation.Graph.Matrix
 
 object Graph {
   def apply(
@@ -57,12 +58,12 @@ object Graph {
 }
 
 class Graph (
-  roomsPerSlot        : IndexedSeq[Int], // map time slot index to room number
-  studentAvailability : IndexedSeq[Seq[Int]],
-  tutorAvailability   : IndexedSeq[Seq[Int]],
-  marginalRank        : Seq[Int], // does not include first-level rank
-  marginalCost        : Seq[Int], // does not include first-level cost
-  unassignedPenalty   : Int
+  val roomsPerSlot        : IndexedSeq[Int], // map time slot index to room number
+  val studentAvailability : IndexedSeq[Seq[Int]],
+  val tutorAvailability   : IndexedSeq[Seq[Int]],
+  val marginalRank        : Seq[Int], // does not include first-level rank
+  val marginalCost        : Seq[Int], // does not include first-level cost
+  val unassignedPenalty   : Int
 ) extends minCostFlow.withActivation.Graph {
 
   val numberOfTimeSlots    : Int = roomsPerSlot.length
@@ -126,19 +127,30 @@ class Graph (
     edgesFromStudents.length + edgesFromSlots.length
   )
 
-  // every tutor has exactly one slot
-  val activationEqMatrix : Matrix = Matrix(tutors.map {
-    case tutor => activationEdges.map(e => if (getTarget(e, edges) == tutor) 1 else 0)
-  })
-  val activationEqResult : IndexedSeq[Int] = tutors.map(_ => 1)
-
-  // no slot has more than its share of rooms
-  val activationLeMatrix : Matrix = Matrix(slots.map {
-    case slot => activationEdges.map(e => if (getSource(e, edges) == slot) 1 else 0)
-  })
-
-  val activationLeResult : IndexedSeq[Int] = roomsPerSlot
-
   def computeReport(): Report =
     Report(this, minCostFlow.IntegerProgram.computeActivatedFlow(this))
+
+  override
+  def createIntegerProgram(): (MIProblem, IndexedSeq[MPIntVar], IndexedSeq[MPIntVar]) =
+    createIntegerProgramWithAdditionalConstraints {
+      case (problem, flow, activation) =>
+        implicit val _problem = problem
+
+        // each tutor may only be assigned to one slot
+        val unicityOfTutors = tutors.map {
+          case tutor =>
+            val incoming = edgeIndices.filter(i => getTarget(i, edges) == tutor)
+            incoming.map(activationEdges.indexOf).map(activation).fold[Expression](0)(_ + _) := 1
+        }
+
+        // assigned slots is no more than available rooms for it
+        val sufficiencyOfRooms = slots.zipWithIndex.map {
+          case (slot, slotIndex) =>
+            val outgoing = edgeIndices.filter(i => getSource(i, edges) == slot)
+            outgoing.map(activationEdges.indexOf).map(activation).fold[Expression](0)(_ + _) <= roomsPerSlot(slotIndex)
+        }
+
+        unicityOfTutors ++ sufficiencyOfRooms
+    }
+
 }

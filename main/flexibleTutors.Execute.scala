@@ -55,6 +55,13 @@ object Execute {
 
         reportTime(timeCompute, "flow computation")
 
+        report.slotOfStudent.zipWithIndex.foreach {
+          case (slot, student) =>
+            println(f"student $student%3d got slot $slot amonst ${
+              graph.studentAvailability(student).mkString(", ")
+            }")
+        }
+
       case Relax | IProg =>
 
         val solver: minCostFlow.Solver = mode match {
