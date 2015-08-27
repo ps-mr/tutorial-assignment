@@ -5,15 +5,25 @@ import Graph._
 
 object IntegerProgram extends Solver {
   def computeFlow(graph: Graph): Flow = {
+
     implicit val (problem, flowVars) = graph.createIntegerProgram()
+
+    // tolerance of rounding inaccuracy
+    // is such that every float deviating for this much changes
+    // their sum by less than 0.5
+    val epsilon: Double = 0.25 / flowVars.size
+
     start()
     val objective = objectiveValue
-    val flow = flowVars.map(_.value.get.toInt)
-    release()
-
-    for { i <- List(36, 37, 38, 39) } {
-      println(s"flow($i) = ${flow(i)}")
+    val flow = flowVars.map {
+      case v =>
+        val fpn = v.value.get
+        val int = Math.round(fpn).toInt
+        if (Math.abs(fpn - int) > epsilon)
+          sys error s"rounding flow = $fpn with epsilon = $epsilon"
+        int
     }
+    release()
 
     flow
   }

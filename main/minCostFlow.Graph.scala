@@ -35,9 +35,13 @@ trait Graph {
     import optimus.algebra._
 
     implicit val problem = MIProblem(SolverLib.oJalgo)
-    val flow: IndexedSeq[MPIntVar] = Range(0, edges.length).map {
+    val flow = Range(0, edges.length).map {
       case i =>
         MPIntVar("flow" + i, Range(0, capacity(i) + 1))
+
+        // using a float var improves performance on last year's data
+        // from 1.5 s to 1.2 sec, which isn't significant enough.
+        // MPFloatVar("flow" + i, 0.0, capacity(i))
     }
 
     val flowWithIndex = flow.zipWithIndex
@@ -54,14 +58,6 @@ trait Graph {
     yield outgoingFlow - incomingFlow := supply(v)
 
     val constraints = capacityConstraints ++ supplyConstraints
-
-    //DEBUG
-    println
-    println("edges = " + edges.slice(36, 40))
-    println("flow = " + flow.slice(36, 40))
-    println(s"supply = ${supply.take(10)}")
-    println(s"constraints\n" + supplyConstraints.take(10).map("  " + _).mkString("\n"))
-    println
 
     minimize { (for ((x, i) <- flowWithIndex) yield x * cost(i)).fold[Expression](0)(_ + _) }
     subjectTo(constraints: _*)

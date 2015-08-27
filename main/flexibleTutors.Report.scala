@@ -20,26 +20,16 @@ case class Report (
     }).map(e => getTarget(e, edges) - students)
   }
 
-  var laststudent = Set.empty[Int] // DEBUG
-
   /** find out which choice a student is assigned to */
   def choiceOf(student: Vertex): Option[Int] = {
 
-    //DEBUG
-    if (student == 9 && ! laststudent(student)) {
-      println(s"9's student = $student")
-      println(s"9's outdegree = $outDegree")
-      println(s"9's flow = ${flow.slice(outDegree * student, outDegree * (student + 1))}")
-      println(s"${flow(36)}, ${flow(37)}, ${flow(38)}, ${flow(39)}")
-    }
-
-    flow.slice(outDegree * student, outDegree * (student + 1)).indexWhere(_ == 1) match {
+    val flowFromStudent = flow.slice(outDegree * student, outDegree * (student + 1))
+    flowFromStudent.indexWhere(_ == 1) match {
       case i if 0 <= i && i < choices =>
         Some(i)
 
       case i if i < 0 =>
-        if (! laststudent(student)) { println(s"\ni = -1 for student $student\n") ; laststudent += student }
-        None
+        sys error s"no outgoing flow for student $student: $flowFromStudent"
 
       case _ =>
         None
