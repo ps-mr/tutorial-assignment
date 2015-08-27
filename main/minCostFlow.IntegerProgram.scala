@@ -4,8 +4,27 @@ import optimus.optimization._
 import Graph._
 
 object IntegerProgram extends Solver {
-  def computeFlow(graph: Graph): Flow = {
+  def computeActivatedFlow(graph: withActivation.Graph): Flow = {
+    implicit val (problem, flowVars, activationVars) = graph.createIntegerProgram()
 
+    // code duplication
+    val epsilon: Double = 0.25 / flowVars.size
+
+    start()
+    val flow = flowVars.map {
+      case v =>
+        val fpn = v.value.get
+        val int = Math.round(fpn).toInt
+        if (Math.abs(fpn - int) > epsilon)
+          sys error s"rounding flow = $fpn with epsilon = $epsilon"
+        int
+    }
+    release()
+
+    flow
+  }
+
+  def computeFlow(graph: Graph): Flow = {
     implicit val (problem, flowVars) = graph.createIntegerProgram()
 
     // tolerance of rounding inaccuracy
