@@ -1,5 +1,5 @@
 449 students
-  9 tutors
+  9 time slots
 2	6	0
 6	3	5
 2	8	4

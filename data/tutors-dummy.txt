@@ -1,0 +1,37 @@
+   9 time slots
+  35 tutors
+	OK						OK	
+				OK				OK
+			OK	OK				OK
+OK	OK				OK	OK	OK	
+	OK	OK	OK	OK				
+			OK	OK				OK
+		OK	OK	OK			OK	
+		OK				OK	OK	
+		OK	OK	OK			OK	
+OK		OK	OK	OK		OK	OK	
+			OK	OK		OK	OK	
+	OK	OK				OK	OK	OK
+	OK						OK	
+						OK	OK	
+OK				OK				
+		OK		OK			OK	OK
+OK		OK						OK
+		OK		OK				
+OK	OK		OK			OK	OK	
+	OK		OK			OK		
+	OK						OK	
+OK	OK						OK	OK
+OK				OK				OK
+OK					OK			DUH
+OK	OK					OK		
+				OK				OK
+			OK	OK				OK
+OK	OK				OK	OK	OK	
+	OK	OK	OK	OK				
+			OK	OK				OK
+		OK	OK	OK			OK	
+		OK				OK	OK	
+		OK	OK	OK			OK	
+OK		OK	OK	OK		OK	OK	
+			OK	OK		OK	OK	
