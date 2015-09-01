@@ -9,7 +9,7 @@ object Forum {
     val map: Map[String, String] = {
       // secret, not to be shared
       val credentialFile = new java.io.File(getClass.getResource("").getPath,
-        "../../../../data/credential.json")
+        "../../../../scheduler-secret/credential.json")
       import DefaultJsonProtocol._
       scala.io.Source.fromFile(credentialFile).mkString.
         parseJson.convertTo[Map[String, String]]
