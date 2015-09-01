@@ -34,13 +34,18 @@ object Users {
     val preferences: IndexedSeq[Seq[Int]] =
       Vector.fill(students) {
         val prefs = (line.next().split("\\s+").map(_.toInt): Seq[Int])
-        prefs
+        prefs.toList.sorted
       }
 
     // produce students with id in the thousands
     val users = new Users(preferences.zipWithIndex.map {
       case (pref, i) =>
-        Student(i * 1000, pref.map(Rooms.dummy.slotNames))
+        Student (
+          id = i * 1000,
+          name = s"student$i",
+          email = s"no-reply$i@example.com",
+          availability = Range(0, Rooms.dummy.slotNames.size).map(pref.contains)
+        )
     }) {
       protected[this]
       override def getGroupName(): IndexedSeq[String] = Rooms.dummy.slotNames
@@ -56,19 +61,24 @@ object Users {
 class Users(_students: Seq[Student]) {
   import collection.breakOut
 
-  val studentsWithChoices : Seq[Student] = _students.filter(_.choices.nonEmpty)
+  val dumpedStudents: Seq[Student] = _students
 
-  // subclasses should override this if the mapping to group names is known
+  val validStudents : Seq[Student] = _students.filter {
+    s => s.availability.nonEmpty && s.availability.max
+  }
+
+  // subclasses should override this if the mapping to group names is different
   protected[this]
-  def getGroupName(): IndexedSeq[String] = studentsWithChoices.flatMap(_.choices)(breakOut).toVector
+  def getGroupName(): IndexedSeq[String] = Student.Field.timeslots
 
   val groupName   : IndexedSeq[String]   = getGroupName()
   val groupRank   : Map[String, Int]     = groupName.zipWithIndex.toMap
 
-  val studentId   : IndexedSeq[Int]      = studentsWithChoices.map(_.id)(breakOut)
+  val studentId   : IndexedSeq[Int]      = validStudents.map(_.id)(breakOut)
   val studentRank : Map[Int, Int]        = studentId.zipWithIndex.toMap
 
-  val preferences : IndexedSeq[Seq[Int]] = studentsWithChoices.map(_.choices.map(groupRank))(breakOut)
+  val preferences : IndexedSeq[Seq[Int]] =
+    validStudents.map(_.availability.zipWithIndex.withFilter(_._1).map(_._2))(breakOut)
   def groups      : Int                  = groupName.length
-  def students    : Int                  = preferences.length
+  def numberOfValidStudents : Int        = preferences.length
 }

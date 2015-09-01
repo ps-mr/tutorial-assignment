@@ -3,17 +3,17 @@ package remote
 import data._
 import scalaj.http._
 import spray.json._
+import DefaultJsonProtocol._
 
 object Forum {
+  def secretJson[T: JsonReader](filename: String): T = {
+    val secretDir = "scheduler-secret"
+    val file = new java.io.File(getClass.getResource("").getPath, s"../../../../$secretDir/$filename")
+    io.Source.fromFile(file).mkString.parseJson.convertTo[T]
+  }
+
   object credential {
-    val map: Map[String, String] = {
-      // secret, not to be shared
-      val credentialFile = new java.io.File(getClass.getResource("").getPath,
-        "../../../../scheduler-secret/credential.json")
-      import DefaultJsonProtocol._
-      scala.io.Source.fromFile(credentialFile).mkString.
-        parseJson.convertTo[Map[String, String]]
-    }
+    val map = secretJson[Map[String, String]]("credential.json")
 
     val apiKey       = ("api_key", map("api_key"))
     val dump         = map("dump")
@@ -43,15 +43,23 @@ object Forum {
       response.body
   }
 
+  def putRequest(url: String, keyvals: Seq[(String, String)]): HttpRequest =
+    Http(url).postForm(keyvals).copy(method = "PUT")
+
+  // TODO: wait for forum rebuild, then fix this method.
+  // Test with CURL to verify that it's okay to send api key as
+  // a form variable.
   def setUserField(userid: Int, key: String, value: String): Unit = {
     val response: HttpResponse[String] =
-      Http(credential.setUserField).
-        postForm(Seq(
+      putRequest(
+        credential.setUserField,
+        Seq(
           credential.apiKey,
           (credential.userid    , userid.toString),
           (credential.userfield , key),
           (credential.value     , value)
-        )).asString
+        )
+      ).asString
 
     if (response.isError)
       sys error response.toString

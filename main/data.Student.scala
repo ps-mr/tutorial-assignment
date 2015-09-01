@@ -1,12 +1,17 @@
 package data
 
 import spray.json._
+import remote.Forum.secretJson
+import remote.Forum.credential.truth
 
 object Student extends DefaultJsonProtocol {
   /** configurable field names */
   object Field {
-    val id      = "id"
-    val choices = (1 to 5).map("choice" + _)
+    val id = "id"
+    val name = "name"
+    val email = "email"
+    lazy val timeslots = secretJson[Vector[String]]("timeslots.json")
+    lazy val List(assigned_group, assigned_at) = secretJson[List[String]]("assigned_at.json")
   }
 
 
@@ -14,26 +19,38 @@ object Student extends DefaultJsonProtocol {
     def write(s: Student): JsValue =
       JsObject(Map[String, JsValue](
         (Field.id -> JsNumber(s.id)) +:
-          Field.choices.zip(s.choices.map(JsString.apply)): _*))
+          Field.timeslots.zip(s.availability.map(
+            avail => if (avail) JsString(truth) else JsNull
+          )): _*))
 
     // don't care about preference,
     // consider first choice as important as third choice
     def read(value: JsValue): Student =
       value match {
         case JsObject(field) =>
-          import Field.{id, choices}
+          import Field._
+
           Student(
-            id      = field(id).convertTo[Int],
-            choices = for {
-              choice <- choices
-              result <- field.get(choice)
-              string <- result match {
-                case JsString(s) => Some(s)
-                case JsNull      => None
-                case _           => deserializationError("tutorial choice must be a string or NULL")
-              }
+            id = field(id).convertTo[Int],
+
+            name = field(name) match {
+              case JsString(s) => s
+              case JsNull => "Anonymous"
+              case _ => deserializationError("student name must be a string or NULL")
+            },
+
+            email = field(email).convertTo[String],
+
+            availability = for {
+              slot   <- timeslots
+              result <- field.get(slot)
             }
-            yield string)
+            yield result match {
+              case JsString(s) => s == truth
+              case JsNull      => false
+              case _           => deserializationError("tutorial choice must be a string or NULL")
+            }
+          )
 
         case _ =>
           deserializationError("student expected")
@@ -43,10 +60,7 @@ object Student extends DefaultJsonProtocol {
 
 case class Student(
   id: Int,
-  choices: Seq[String]
-) {
-
-  // idea: custom json protocol
-
-  //val jsonData: Map[String, Seq[Map[String, 
-}
+  name: String,
+  email: String,
+  availability: Seq[Boolean]
+)
