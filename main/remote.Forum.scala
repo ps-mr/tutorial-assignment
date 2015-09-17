@@ -44,11 +44,8 @@ object Forum {
   }
 
   def putRequest(url: String, keyvals: Seq[(String, String)]): HttpRequest =
-    Http(url).postForm(keyvals).copy(method = "PUT")
+    Http(url).postForm(keyvals).method("PUT")
 
-  // TODO: wait for forum rebuild, then fix this method.
-  // Test with CURL to verify that it's okay to send api key as
-  // a form variable.
   def setUserField(userid: Int, key: String, value: String): Unit = {
     val response: HttpResponse[String] =
       putRequest(
