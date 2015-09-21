@@ -1,38 +1,38 @@
    9 time slots
   35 tutors
 	Mo 08-10	Mo 10-12	Mo 12-14	Mo 14-16	Mo 16-18	Mo 18-20	Mo 20-22	Mo 22-24	Di 08-10
-Abel		OK						OK	
-Abigail					OK				OK
-Abner				OK	OK				OK
-Abraham	OK	OK				OK	OK	OK	
-Acacia		OK	OK	OK	OK				
-Ada				OK	OK				OK
-Adelaide			OK	OK	OK			OK	
-Adeline			OK				OK	OK	
-Aiden			OK	OK	OK			OK	
-Alec	OK		OK	OK	OK		OK	OK	
-Alexa				OK	OK		OK	OK	
-Alexander		OK	OK				OK	OK	OK
-Alistair		OK						OK	
-Amelia							OK	OK	
-Amias	OK				OK				
-Amory			OK		OK			OK	OK
-Amos	OK		OK						OK
-Anais			OK		OK				
-Anastasia	OK	OK		OK			OK	OK	
-Anderson		OK		OK			OK		
-Angelina		OK						OK	
-Anna	OK	OK						OK	OK
-Annabel	OK				OK				OK
-Antonia	OK					OK			DUH
-Arabella	OK	OK					OK		
-Archer					OK				OK
-Arden				OK	OK				OK
-Arianna	OK	OK				OK	OK	OK	
-Ariel		OK	OK	OK	OK				
-Arlo				OK	OK				OK
-Arthur			OK	OK	OK			OK	
-Asa			OK				OK	OK	
-Asher			OK	OK	OK			OK	
-Ashton	OK		OK	OK	OK		OK	OK	
-Atticus				OK	OK		OK	OK	
+abel	Abel		OK						OK
+abigail	Abigail					OK				OK
+abner	Abner				OK	OK				OK
+abraham	Abraham	OK	OK				OK	OK	OK
+acacia	Acacia		OK	OK	OK	OK
+ada	Ada				OK	OK				OK
+adelaide	Adelaide			OK	OK	OK			OK
+adeline	Adeline			OK				OK	OK
+aiden	Aiden			OK	OK	OK			OK
+alec	Alec	OK		OK	OK	OK		OK	OK
+alexa	Alexa				OK	OK		OK	OK
+alexander	Alexander		OK	OK				OK	OK	OK
+alistair	Alistair		OK						OK
+amelia	Amelia							OK	OK
+amias	Amias	OK				OK
+amory	Amory			OK		OK			OK	OK
+amos	Amos	OK		OK						OK
+anais	Anais			OK		OK
+anastasia	Anastasia	OK	OK		OK			OK	OK
+anderson	Anderson		OK		OK			OK
+angelina	Angelina		OK						OK
+anna	Anna	OK	OK						OK	OK
+annabel	Annabel	OK				OK				OK
+antonia	Antonia	OK					OK			DUH
+arabella	Arabella	OK	OK					OK
+archer	Archer					OK				OK
+arden	Arden				OK	OK				OK
+arianna	Arianna	OK	OK				OK	OK	OK
+ariel	Ariel		OK	OK	OK	OK
+arlo	Arlo				OK	OK				OK
+arthur	Arthur			OK	OK	OK			OK
+asa	Asa			OK				OK	OK
+asher	Asher			OK	OK	OK			OK
+ashton	Ashton	OK		OK	OK	OK		OK	OK
+atticus	Atticus				OK	OK		OK	OK
