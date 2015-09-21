@@ -105,10 +105,21 @@ case class Student(
         (None, None)
     }
 
-  // precondition: this.assignedGroup != None
-  def tutorIndex(tutors: Tutors): Int = {
-    val index = tutors.usernames.indexOf(tutor.get)
-    assert(index >= 0)
-    index
-  }
+  // return Some(i) only if student is assigned to a slot where he's available
+  def slotIndex: Option[Int] =
+    for {
+      s <- slot
+      i = Field.timeslots.indexOf(s)
+      if i >= 0 && availability(i)
+    }
+    yield i
+
+  // return Some(i) only if student is assigned to an existent tutor
+  def tutorIndex(tutors: Tutors): Option[Int] =
+    for {
+      t <- tutor
+      i = tutors.usernames.indexOf(t)
+      if i >= 0
+    }
+    yield i
 }

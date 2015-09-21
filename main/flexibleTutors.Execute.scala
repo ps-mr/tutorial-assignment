@@ -46,7 +46,7 @@ object Execute {
         reportTime(timeInit, "initialization and IO")
 
         val timeConstruct = now()
-        val graph = tutorial.Graph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
+        val graph = new tutorial.Graph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
 
         reportTime(timeConstruct, "graph construction")
 

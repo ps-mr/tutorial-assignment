@@ -39,24 +39,6 @@ import optimus.optimization._
 import optimus.algebra.Expression
 import minCostFlow.Graph._
 
-object Graph {
-  def apply(
-    users             : data.Users,
-    rooms             : data.Rooms,
-    tutors            : data.Tutors,
-    marginalRank      : Seq[Int],
-    marginalCost      : Seq[Int],
-    unassignedPenalty : Int
-  ): Graph = new Graph (
-    roomsPerSlot        = rooms.roomsPerSlot,
-    studentAvailability = users.preferences,
-    tutorAvailability   = tutors.availability,
-    marginalRank        = marginalRank,
-    marginalCost        = marginalCost,
-    unassignedPenalty   = unassignedPenalty
-  )
-}
-
 class Graph (
   val roomsPerSlot        : IndexedSeq[Int], // map time slot index to room number
   val studentAvailability : IndexedSeq[Seq[Int]],
@@ -65,6 +47,21 @@ class Graph (
   val marginalCost        : Seq[Int], // does not include first-level cost
   val unassignedPenalty   : Int
 ) extends minCostFlow.withActivation.Graph {
+  def this(
+    users             : data.Users,
+    rooms             : data.Rooms,
+    tutors            : data.Tutors,
+    marginalRank      : Seq[Int],
+    marginalCost      : Seq[Int],
+    unassignedPenalty : Int
+  ) = this(
+    roomsPerSlot        = rooms.roomsPerSlot,
+    studentAvailability = users.preferences,
+    tutorAvailability   = tutors.availability,
+    marginalRank        = marginalRank,
+    marginalCost        = marginalCost,
+    unassignedPenalty   = unassignedPenalty
+  )
 
   val numberOfTimeSlots    : Int = roomsPerSlot.length
   val numberOfStudents     : Int = studentAvailability.length
@@ -128,11 +125,15 @@ class Graph (
   )
 
   def computeReport(): Report =
-    Report(this, minCostFlow.IntegerProgram.computeActivatedFlow(this))
+    new Report(this, minCostFlow.IntegerProgram.computeActivatedFlow(this))
 
   override
-  def createIntegerProgram(): (MIProblem, IndexedSeq[MPIntVar], IndexedSeq[MPIntVar]) =
-    createIntegerProgramWithAdditionalConstraints {
+  def createIntegerProgramWithAdditionalConstraints(
+    additionalConstraints:
+        (MIProblem, IndexedSeq[MPIntVar], IndexedSeq[MPIntVar]) =>
+          Seq[optimus.algebra.Constraint]
+  ): (MIProblem, IndexedSeq[MPIntVar], IndexedSeq[MPIntVar]) =
+    super.createIntegerProgramWithAdditionalConstraints {
       case (problem, flow, activation) =>
         implicit val _problem = problem
 
@@ -150,7 +151,10 @@ class Graph (
             outgoing.map(activationEdges.indexOf).map(activation).fold[Expression](0)(_ + _) <= roomsPerSlot(slotIndex)
         }
 
-        unicityOfTutors ++ sufficiencyOfRooms
+        // user constraints given in the argument
+        val userConstraints = additionalConstraints(problem, flow, activation)
+
+        unicityOfTutors ++ sufficiencyOfRooms ++ userConstraints
     }
 
 }

@@ -2,7 +2,7 @@ package tutorial
 
 import minCostFlow.Graph._
 
-case class Report(graph: Graph, flow: Flow) {
+class Report(val graph: Graph, val flow: Flow) {
   import graph._
 
   def vertexToSlot(v: Vertex): Int = v - numberOfStudents
@@ -77,7 +77,9 @@ case class Report(graph: Graph, flow: Flow) {
         yield t
     }
 
-  val studentsOfTutor: IndexedSeq[Seq[Int]] = {
+  val studentsOfTutor: IndexedSeq[Seq[Int]] = computeStudentsOfTutor
+
+  def computeStudentsOfTutor: IndexedSeq[Seq[Int]] = {
     val remainderOfSlot = Array(studentsOfSlot: _*)
     slotOfTutor.zipWithIndex.map {
       case (Some(slot), tutor) =>

@@ -33,7 +33,7 @@ object Tutors {
         val username +: name +: avail = splitAtEachTab(line.next)
         usernames  += username
         tutorNames += name
-        assert(avail.size == numberOfSlots)
+        assert(avail.size <= numberOfSlots)
         avail.zipWithIndex.flatMap {
           case ("", i) => None
           case (_ , i) => Some(i) // nonempty string means okay

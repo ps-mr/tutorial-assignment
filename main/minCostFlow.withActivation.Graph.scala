@@ -33,6 +33,7 @@ trait Graph {
 
   /** @return (problem, flow, activation)
     */
+  final
   def createIntegerProgram(): (MIProblem, IndexedSeq[MPIntVar], IndexedSeq[MPIntVar]) =
     createIntegerProgramWithAdditionalConstraints((_, _, _) => Seq.empty)
 
