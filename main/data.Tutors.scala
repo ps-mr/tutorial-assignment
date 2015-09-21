@@ -27,9 +27,11 @@ object Tutors {
     val slotNames  = splitAtEachTab(line.next).tail
     assert(slotNames.size == numberOfSlots)
     val tutorNames = collection.mutable.MutableList.empty[String]
+    val usernames  = collection.mutable.MutableList.empty[String]
     val tutorAvailability = Range(0, numberOfTutors).map {
       case i =>
-        val name +: avail = splitAtEachTab(line.next)
+        val username +: name +: avail = splitAtEachTab(line.next)
+        usernames  += username
         tutorNames += name
         assert(avail.size == numberOfSlots)
         avail.zipWithIndex.flatMap {
@@ -37,12 +39,17 @@ object Tutors {
           case (_ , i) => Some(i) // nonempty string means okay
         }
     }
-    Tutors(slotNames.toVector, tutorNames.toVector, tutorAvailability)
+    Tutors(
+      slotNames    = slotNames.toVector,
+      tutorNames   = tutorNames.toVector,
+      usernames    = usernames.toVector,
+      availability = tutorAvailability)
   }
 }
 
 case class Tutors (
   slotNames    : IndexedSeq[String],
   tutorNames   : IndexedSeq[String],
+  usernames    : IndexedSeq[String],
   availability : IndexedSeq[Seq[Int]]
 )

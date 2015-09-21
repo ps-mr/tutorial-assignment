@@ -27,6 +27,9 @@ object Forum {
     val truth        = "true"
     val error        = "error"
 
+    // whether a checkbox is checked or not
+    def checked(s: String): Boolean = s.nonEmpty
+
     def dumpWithApiKey: String = {
       val (key, value) = apiKey
       s"$dump?$key=$value"

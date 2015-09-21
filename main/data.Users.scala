@@ -42,6 +42,7 @@ object Users {
       case (pref, i) =>
         Student (
           id = i * 1000,
+          username = s"username$i",
           name = s"student$i",
           email = s"no-reply$i@example.com",
           availability = Range(0, Rooms.dummy.slotNames.size).map(pref.contains)
