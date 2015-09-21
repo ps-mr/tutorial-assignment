@@ -29,8 +29,8 @@
   * The activation edges are the edges between time slots and tutors.
   * The equality constraint makes sure that each tutor is assigned
   * to exactly one time slot. The inequality constraint makes sure
-  * that a time slot is never assigned to more rooms than there are
-  * tutors for.
+  * that a time slot is never assigned to more tutors than there are
+  * rooms for.
   */
 
 package tutorial
