@@ -106,10 +106,10 @@ case class Student(
     }
 
   // return Some(i) only if student is assigned to a slot where he's available
-  def slotIndex: Option[Int] =
+  def slotIndex(tutors: Tutors): Option[Int] =
     for {
       s <- slot
-      i = Field.timeslots.indexOf(s)
+      i = tutors.slotNames.indexOf(s)
       if i >= 0 && availability(i)
     }
     yield i
@@ -124,5 +124,5 @@ case class Student(
     yield i
 
   def isAssigned(tutors: Tutors): Boolean =
-    slotIndex.nonEmpty && tutorIndex(tutors).nonEmpty
+    slotIndex(tutors).nonEmpty && tutorIndex(tutors).nonEmpty
 }

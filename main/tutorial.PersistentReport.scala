@@ -18,6 +18,7 @@ extends Report(graph, flow) {
       // sanity check: optimizer-produced slot agrees with preassigned slot
       assert(slotOfStudent(student) == Some(slot))
       assert(slotOfTutor(tutor) == Some(slot))
+      assign(student, tutor)
     }
 
     // has no effect on pre-assigned students
@@ -59,8 +60,14 @@ extends Report(graph, flow) {
     for {
       (studentData, student) <- userData.validStudents.zipWithIndex
       if ! studentData.isAssigned(tutorData) // student wasn't assigned before
-      slot <- slotOfStudent(student) // student is assigned now
+      group <- formatAssignedGroup(student) // student is assigned now
+    }
+    yield studentData.copy(assignedGroup = Some(group))
+
+  def formatAssignedGroup(student: Int): Option[String] =
+    for {
+      slot <- slotOfStudent(student)
       tutor = tutorOfStudent(student)
     }
-    yield studentData.copy(assignedGroup = Some(tutorData.formatSlotTutor(slot, tutor)))
+    yield tutorData.formatSlotTutor(slot, tutor)
 }

@@ -31,15 +31,15 @@ extends FlatSpec
 
   def mkGraph : (Users, Rooms, Tutors, Seq[Int], Seq[Int], Int) => Graph
 
+  val marginalRank      = Seq(1, 1, 1,  1,  1)
+  val marginalCost      = Seq(1, 3, 6, 10, 15)
+  val unassignedPenalty = 5000
+
+  val users  = data.Users.year2014
+  val rooms  = data.Rooms.dummy
+  val tutors = data.Tutors.dummy
+
   name should "classify last year's data without crashing" in {
-    val marginalRank      = Seq(1, 1, 1,  1,  1)
-    val marginalCost      = Seq(1, 3, 6, 10, 15)
-    val unassignedPenalty = 5000
-
-    val users  = data.Users.year2014
-    val rooms  = data.Rooms.dummy
-    val tutors = data.Tutors.dummy
-
     graph = mkGraph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
     report = graph.computeReport()
   }

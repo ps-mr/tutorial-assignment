@@ -10,10 +10,42 @@ extends GraphSpecTrait[PersistentReport, PersistentGraph]("tutorial.PersistentGr
 
   it should "format student assignment correctly" in {
     val Seq(g1, g2, g3, g4, g5) = report.assignedStudents.take(5).map(_.assignedGroup.get)
+
+    // this test is solver-dependent.
     assert(g1 == "monday_20-alec")
     assert(g2 == "monday_18-antonia")
     assert(g3 == "tuesday_08-abigail")
     assert(g4 == "monday_22-abraham")
     assert(g5 == "monday_18-antonia")
+  }
+
+  // test whether persistence works by pre-assigning first 4 students,
+  // with 2 valid assignments followed by 2 invalid assignments.
+  val fst +: snd +: trd +: fth +: rest = users.dumpedStudents
+
+  val newStudents = {
+    fst.copy(assignedGroup = Some("monday_08-ashton"  )) +: // valid assignment
+    snd.copy(assignedGroup = Some("monday_20-atticus" )) +: // valid assignment
+    trd.copy(assignedGroup = Some("monday_08-ashton"  )) +: // unavailable slot
+    fth.copy(assignedGroup = Some("monday_20-benjamin")) +: // nonexistent tutor
+    rest
+  }
+
+  val newGraph =
+    mkGraph(new Users(newStudents), rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
+
+  val newReport =
+    newGraph.computeReport()
+
+  val newlyAssigned = newReport.assignedStudents
+
+  it should "persist valid pre-assignments" in {
+    assert(newReport.formatAssignedGroup(0) == Some("monday_08-ashton"  ))
+    assert(newReport.formatAssignedGroup(1) == Some("monday_20-atticus" ))
+
+    // these are solver-dependent
+    assert(newReport.formatAssignedGroup(2) == Some("monday_12-aiden"   ))
+    assert(newReport.formatAssignedGroup(3) == Some("monday_22-adelaide"))
+    assert(newReport.formatAssignedGroup(4) == Some("monday_22-adelaide"))
   }
 }

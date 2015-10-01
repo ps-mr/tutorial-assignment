@@ -39,7 +39,7 @@ class PersistentGraph(
     for {
       _ <- Map(0 -> (0, 0)) // type annotation really
       (student, studentIndex) <- userData.validStudents.zipWithIndex
-      slotIndex               <- student.slotIndex
+      slotIndex               <- student.slotIndex(tutorData)
       tutorIndex              <- student.tutorIndex(tutorData)
     }
     yield (studentIndex, (slotIndex, tutorIndex))
