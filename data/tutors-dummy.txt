@@ -1,6 +1,6 @@
    9 time slots
   35 tutors
-	Mo 08-10	Mo 10-12	Mo 12-14	Mo 14-16	Mo 16-18	Mo 18-20	Mo 20-22	Mo 22-24	Di 08-10
+		monday_08	monday_10	monday_12	monday_14	monday_16	monday_18	monday_20	monday_22	tuesday_08
 abel	Abel		OK						OK
 abigail	Abigail					OK				OK
 abner	Abner				OK	OK				OK

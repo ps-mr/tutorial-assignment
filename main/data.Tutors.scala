@@ -24,7 +24,7 @@ object Tutors {
     val line = io.Source.fromFile(file).getLines()
     val numberOfSlots  = getFirstInt(line.next)
     val numberOfTutors = getFirstInt(line.next)
-    val slotNames  = splitAtEachTab(line.next).tail
+    val slotNames  = splitAtEachTab(line.next).tail.tail // skip 2 tabs
     assert(slotNames.size == numberOfSlots)
     val tutorNames = collection.mutable.MutableList.empty[String]
     val usernames  = collection.mutable.MutableList.empty[String]

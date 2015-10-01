@@ -1,11 +1,11 @@
    9 time slots
   40 rooms
-Mo 08-10: A B, C, D, E
-Mo 10-12: E F, G, H, I, J
-Mo 12-14: K L, M, N, O, P, Q R
-Mo 14-16: S T
-Mo 16-18: U V
-Mo 18-20: W, X, Y, Z
-Mo 20-22: A, B, C, D, E
-Mo 22-24: F, G, H, I, J, K, L
-Di 08-10: M, N, O, P, W, R, S
+monday_08: A B, C, D, E
+monday_10: E F, G, H, I, J
+monday_12: K L, M, N, O, P, Q R
+monday_14: S T
+monday_16: U V
+monday_18: W, X, Y, Z
+monday_20: A, B, C, D, E
+monday_22: F, G, H, I, J, K, L
+tuesday_08: M, N, O, P, W, R, S
