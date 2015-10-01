@@ -1,5 +1,7 @@
 scalaVersion := "2.11.7"
 
+scalacOptions := List("-feature")
+
 scalaSource in Compile := baseDirectory.value / "main"
 
 scalaSource in Test := baseDirectory.value / "test"
