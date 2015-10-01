@@ -60,7 +60,7 @@ object Execute {
 
         reportTime(timeCompute, "flow computation")
 
-        println(report.forHuman(rooms, tutors))
+        println(report.forHuman(rooms, tutors, users.validStudents))
 
         if (exportJson) {
           println()

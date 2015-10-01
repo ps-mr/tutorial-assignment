@@ -101,8 +101,8 @@ class Report(val graph: Graph, val flow: Flow) {
     }
     yield (student, tutor)
 
-  def tutorsOfSlotForHuman(rooms: data.Rooms, tutors: data.Tutors):
-      Seq[(String, Seq[(String, String, Int)])] =
+  def tutorsOfSlotForHuman(rooms: data.Rooms, tutors: data.Tutors, students: Seq[data.Student]):
+      Seq[(String, Seq[(String, String, Seq[String])])] =
     tutorsOfSlot.zip(rooms.roomNames).zipWithIndex.map {
       case (tutorsAndRoomNames, slot) =>
         ( rooms.slotNames(slot),
@@ -110,18 +110,22 @@ class Report(val graph: Graph, val flow: Flow) {
             case (tutor, room) =>
               ( tutors.tutorNames(tutor)
               , room
-              , groupSizeOfTutor(tutor)
+              , studentsOfTutor(tutor).map(i => students(i).username).toList.sorted
               )
           }
         )
     }
 
-  def forHuman(rooms: data.Rooms, tutors: data.Tutors): String =
-    tutorsOfSlotForHuman(rooms, tutors).flatMap({
+  def forHuman(rooms: data.Rooms, tutors: data.Tutors, students: Seq[data.Student]): String =
+    tutorsOfSlotForHuman(rooms, tutors, students).flatMap({
       case (slot, tutorRoomStudents) =>
-        s"\n$slot:" +: (
-          for { (tutor, room, students) <- tutorRoomStudents }
-          yield f"  $students%2d students in $room%4s with $tutor"
-        )
+        //s"\n$slot:" +:
+        for {
+          (tutor, room, students) <- tutorRoomStudents
+        }
+        yield {
+          f"\n$slot%12s in $room%4s is $tutor" +
+          s"\n  ${students.mkString(",")}"
+        }
     }).mkString("\n")
 }
