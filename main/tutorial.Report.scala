@@ -93,6 +93,14 @@ class Report(val graph: Graph, val flow: Flow) {
     }
   }
 
+  val tutorOfStudent: Map[Int, Int] =
+    for {
+      _ <- Map(0 -> 0) // type annotation really
+      (students, tutor) <- studentsOfTutor.zipWithIndex
+      student <- students
+    }
+    yield (student, tutor)
+
   def tutorsOfSlotForHuman(rooms: data.Rooms, tutors: data.Tutors):
       Seq[(String, Seq[(String, String, Int)])] =
     tutorsOfSlot.zip(rooms.roomNames).zipWithIndex.map {

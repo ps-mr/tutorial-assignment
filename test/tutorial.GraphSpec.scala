@@ -1,8 +1,14 @@
 package tutorial
 
 import org.scalatest._
+import data._
+import util.ComputeReport
 
-class GraphSpec extends GraphSpecTrait("tutorial.Graph") {
+class GraphSpec
+extends GraphSpecTrait[Report, Graph]("tutorial.Graph")
+{
+  def mkGraph = Graph.apply
+
   it should "sort all tutors and students" in {
     assert(report.unassignedStudents.isEmpty)
     assert(report.unassignedTutors.isEmpty)
@@ -17,9 +23,13 @@ class GraphSpec extends GraphSpecTrait("tutorial.Graph") {
   }
 }
 
-abstract class GraphSpecTrait(name: String) extends FlatSpec {
+abstract class GraphSpecTrait[Report >: Null, Graph >: Null <: ComputeReport[Report]](name: String)
+extends FlatSpec
+{
   var graph : Graph  = null
   var report: Report = null
+
+  def mkGraph : (Users, Rooms, Tutors, Seq[Int], Seq[Int], Int) => Graph
 
   name should "classify last year's data without crashing" in {
     val marginalRank      = Seq(1, 1, 1,  1,  1)
@@ -30,7 +40,7 @@ abstract class GraphSpecTrait(name: String) extends FlatSpec {
     val rooms  = data.Rooms.dummy
     val tutors = data.Tutors.dummy
 
-    graph = new Graph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
+    graph = mkGraph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
     report = graph.computeReport()
   }
 }

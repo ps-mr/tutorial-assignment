@@ -11,6 +11,19 @@ import optimus.optimization._
 import optimus.algebra._
 import minCostFlow.Graph._
 
+object PersistentGraph {
+  // boilerplate to abstract over constructor. cf: test/tutorial.PersistentGraphSpec
+  def apply(
+    users             : data.Users,
+    rooms             : data.Rooms,
+    tutors            : data.Tutors,
+    marginalRank      : Seq[Int],
+    marginalCost      : Seq[Int],
+    unassignedPenalty : Int
+  ): PersistentGraph =
+    new PersistentGraph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
+}
+
 class PersistentGraph(
   val userData      : data.Users,
   val roomData      : data.Rooms,
@@ -19,7 +32,18 @@ class PersistentGraph(
   marginalCost      : Seq[Int],
   unassignedPenalty : Int
 ) extends Graph(userData, roomData, tutorData, marginalRank, marginalCost, unassignedPenalty)
+     with util.ComputeReport[PersistentReport]
 {
+  // preassigned students: studentIndex => (slotIndex, tutorIndex)
+  val preassigned: Map[Int, (Int, Int)] =
+    for {
+      _ <- Map(0 -> (0, 0)) // type annotation really
+      (student, studentIndex) <- userData.validStudents.zipWithIndex
+      slotIndex               <- student.slotIndex
+      tutorIndex              <- student.tutorIndex(tutorData)
+    }
+    yield (studentIndex, (slotIndex, tutorIndex))
+
   // take pre-assigned students into consideration
   override
   def createIntegerProgramWithAdditionalConstraints(
@@ -29,16 +53,6 @@ class PersistentGraph(
     super.createIntegerProgramWithAdditionalConstraints {
       case (problem, flow, activation) =>
         implicit val _problem = problem
-
-        // preassigned students: studentIndex => (slotIndex, tutorIndex)
-        val preassigned: Map[Int, (Int, Int)] =
-          for {
-            _ <- Map.empty[Int, (Int, Int)]
-            (student, studentIndex) <- userData.validStudents.zipWithIndex
-            slotIndex               <- student.slotIndex
-            tutorIndex              <- student.tutorIndex(tutorData)
-          }
-          yield (studentIndex, (slotIndex, tutorIndex))
 
         // mapping students to slots
         val studentToSlot: Map[Int, Int] = preassigned.mapValues(_._1)
@@ -70,4 +84,7 @@ class PersistentGraph(
 
         studentConstraints ++ tutorConstraints
     }
+
+  override def computeReport(): PersistentReport =
+    new PersistentReport(this, computeFlow())
 }

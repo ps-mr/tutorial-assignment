@@ -52,4 +52,7 @@ case class Tutors (
   tutorNames   : IndexedSeq[String],
   usernames    : IndexedSeq[String],
   availability : IndexedSeq[Seq[Int]]
-)
+) {
+  def formatSlotTutor(slot: Int, tutor: Int): String =
+    s"${slotNames(slot)}-${usernames(tutor)}"
+}

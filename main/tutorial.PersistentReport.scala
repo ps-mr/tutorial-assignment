@@ -10,16 +10,57 @@ extends Report(graph, flow) {
   class TutorBuffer {
     val remains = Array(groupSizeOfTutor: _*)
     val assigned = Array.fill(tutors.size)(MutableList.empty[Int])
+    val isAssigned = collection.mutable.Set.empty[Int] // collection of assigned students
 
-    def addPreassigned(student: Int, tutor: Int): Unit = ???
+    // should be called before calling "add to slot"
+    // to ensure all preassigned gets a place
+    def addPreassigned(student: Int, slot: Int, tutor: Int): Unit = {
+      // sanity check: optimizer-produced slot agrees with preassigned slot
+      assert(slotOfStudent(student) == Some(slot))
+      assert(slotOfTutor(tutor) == Some(slot))
+    }
 
-    def addToSlot(student: Int, slot: Int): Unit = ???
+    // has no effect on pre-assigned students
+    def addToSlot(student: Int, slot: Int): Unit =
+      if (! isAssigned(student)) {
+        // there should be some vacancy at the time slot
+        val Some(tutor) = tutorsOfSlot(slot).find(i => remains(i) > 0)
+        assign(student, tutor) // also updates isAssigned
+      }
 
-    def result: IndexedSeq[Seq[Int]] = ???
+    def result: IndexedSeq[Seq[Int]] = assigned
+
+    // has no effect on already assigned students
+    private[this]
+    def assign(student: Int, tutor: Int): Unit =
+      if (! isAssigned(student)) {
+        // check that vacancy exists
+        assert(remains(tutor) > 0)
+        remains(tutor) -= 1
+        assigned(tutor) += student
+        isAssigned += student
+      }
   }
 
   // make sure pre-assigned students stay with their tutors
+  // @return mapping tutor-id to sequences of the tutor's students
   override def computeStudentsOfTutor: IndexedSeq[Seq[Int]] = {
-    ???
+    val buffer = new TutorBuffer
+    for ( (student, (slot, tutor)) <- preassigned )
+      buffer.addPreassigned(student, slot, tutor)
+    for ( (maybeSlot, student) <- slotOfStudent.zipWithIndex ; slot <- maybeSlot )
+      // has no effect on preassigned students
+      buffer.addToSlot(student, slot)
+    buffer.result
   }
+
+  // return sequence of students newly assigned in this assignment
+  def assignedStudents: Seq[data.Student] =
+    for {
+      (studentData, student) <- userData.validStudents.zipWithIndex
+      if ! studentData.isAssigned(tutorData) // student wasn't assigned before
+      slot <- slotOfStudent(student) // student is assigned now
+      tutor = tutorOfStudent(student)
+    }
+    yield studentData.copy(assignedGroup = Some(tutorData.formatSlotTutor(slot, tutor)))
 }

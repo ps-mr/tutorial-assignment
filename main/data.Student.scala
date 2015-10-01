@@ -122,4 +122,7 @@ case class Student(
       if i >= 0
     }
     yield i
+
+  def isAssigned(tutors: Tutors): Boolean =
+    slotIndex.nonEmpty && tutorIndex(tutors).nonEmpty
 }

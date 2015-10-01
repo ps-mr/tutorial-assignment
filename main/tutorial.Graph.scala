@@ -39,6 +39,19 @@ import optimus.optimization._
 import optimus.algebra.Expression
 import minCostFlow.Graph._
 
+object Graph {
+  // boilerplate to abstract over constructor. cf: test/tutorial.GraphSpec
+  def apply(
+    users             : data.Users,
+    rooms             : data.Rooms,
+    tutors            : data.Tutors,
+    marginalRank      : Seq[Int],
+    marginalCost      : Seq[Int],
+    unassignedPenalty : Int
+  ): Graph =
+    new Graph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
+}
+
 class Graph (
   val roomsPerSlot        : IndexedSeq[Int], // map time slot index to room number
   val studentAvailability : IndexedSeq[Seq[Int]],
@@ -46,7 +59,9 @@ class Graph (
   val marginalRank        : Seq[Int], // does not include first-level rank
   val marginalCost        : Seq[Int], // does not include first-level cost
   val unassignedPenalty   : Int
-) extends minCostFlow.withActivation.Graph {
+) extends minCostFlow.withActivation.Graph
+     with util.ComputeReport[Report]
+{
   def this(
     users             : data.Users,
     rooms             : data.Rooms,
@@ -124,8 +139,11 @@ class Graph (
     edgesFromStudents.length + edgesFromSlots.length
   )
 
+  def computeFlow(): Flow =
+    minCostFlow.IntegerProgram.computeActivatedFlow(this)
+
   def computeReport(): Report =
-    new Report(this, minCostFlow.IntegerProgram.computeActivatedFlow(this))
+    new Report(this, computeFlow())
 
   override
   def createIntegerProgramWithAdditionalConstraints(
