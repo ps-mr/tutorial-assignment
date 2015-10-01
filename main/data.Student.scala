@@ -21,20 +21,28 @@ object Student extends DefaultJsonProtocol {
       import remote.Forum.credential.{userid => i, userfield => f, value => v}
       (i, f, v)
     }
-  }
 
-  implicit object FieldFormat extends RootJsonWriter[Field] {
-    import Field._
-    def write(f: Field): JsValue =
-      JsObject(Map[String, JsValue](
-        userid    -> JsNumber(f.userid),
-        userfield -> JsString(f.userfield),
-        value     -> JsString(f.value)))
+    implicit object FieldFormat extends RootJsonWriter[Field] {
+      def write(f: Field): JsValue =
+        JsObject(Map[String, JsValue](
+          userid    -> JsNumber(f.userid),
+          userfield -> JsString(f.userfield),
+          value     -> JsString(f.value)))
+    }
   }
 
   implicit object StudentFormat extends RootJsonFormat[Student] {
     def write(s: Student): JsValue =
-      FieldFormat.write(s.toField)
+      JsObject(Map[String, JsValue](
+        (  Field.id             -> JsNumber(s.id)) +:
+          (Field.username       -> s.username.toJson) +:
+          (Field.name           -> s.name.toJson) +:
+          (Field.email          -> s.email.toJson) +:
+          (Field.assigned_group -> s.assignedGroup.toJson) +:
+          Field.timeslots.zip(s.availability.map {
+            case true  => JsString(truth)
+            case false => JsNull
+          }): _*))
 
     // don't care about preference,
     // consider first choice as important as third choice
@@ -89,6 +97,8 @@ case class Student(
   // defined only if assignedGroup != None
   def toField: Student.Field =
     Field(userid = id, userfield = Field.assigned_group, value = assignedGroup.get)
+
+  def exportJson: JsValue = toField.toJson
 
   // if assignedGroup == None, then slot == tutor == None
   //

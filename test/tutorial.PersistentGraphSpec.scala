@@ -27,7 +27,7 @@ extends GraphSpecTrait[PersistentReport, PersistentGraph]("tutorial.PersistentGr
   }
 
   it should "export into JSON" in {
-    val json = assignedStudents.take(3).toJson.toString
+    val json = assignedStudents.take(3).map(_.exportJson).toJson.toString
     assert(json ==
       """[""" +
       """{"userid":0,"userfield":"assigned_group","value":"monday_20-alec"},""" +

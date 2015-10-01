@@ -2,6 +2,8 @@
 package flexibleTutors
 
 import minCostFlow.Graph._
+import spray.json._
+import DefaultJsonProtocol._
 
 object Execute {
   sealed trait Mode
@@ -14,8 +16,11 @@ object Execute {
     val mode = args match {
       case Array("IntegerProgram") => IProg
       case Array("withActivation") => Activ
+      case Array("json")           => Activ
       case _                       => Relax
     }
+
+    val exportJson = args.nonEmpty && args.head == "json"
 
     def now() = java.util.Calendar.getInstance.getTimeInMillis
     def elapse(last: Long): String = f"${now - last}%8d ms"
@@ -46,7 +51,7 @@ object Execute {
         reportTime(timeInit, "initialization and IO")
 
         val timeConstruct = now()
-        val graph = new tutorial.Graph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
+        val graph = new tutorial.PersistentGraph(users, rooms, tutors, marginalRank, marginalCost, unassignedPenalty)
 
         reportTime(timeConstruct, "graph construction")
 
@@ -56,6 +61,11 @@ object Execute {
         reportTime(timeCompute, "flow computation")
 
         println(report.forHuman(rooms, tutors))
+
+        if (exportJson) {
+          println()
+          println(Map("users" -> report.assignedStudents).toJson.prettyPrint)
+        }
 
       case Relax | IProg =>
 
