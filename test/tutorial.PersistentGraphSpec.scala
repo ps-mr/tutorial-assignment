@@ -3,13 +3,20 @@ package tutorial
 import org.scalatest._
 import data._
 
+import spray.json._
+import DefaultJsonProtocol._
+
 class PersistentGraphSpec
 extends GraphSpecTrait[PersistentReport, PersistentGraph]("tutorial.PersistentGraph")
 {
   def mkGraph = PersistentGraph.apply
 
+  // lazy because this should initialize after superclass is fully
+  // initialized.
+  lazy val assignedStudents = report.assignedStudents
+
   it should "format student assignment correctly" in {
-    val Seq(g1, g2, g3, g4, g5) = report.assignedStudents.take(5).map(_.assignedGroup.get)
+    val Seq(g1, g2, g3, g4, g5) = assignedStudents.take(5).map(_.assignedGroup.get)
 
     // this test is solver-dependent.
     assert(g1 == "monday_20-alec")
@@ -17,6 +24,15 @@ extends GraphSpecTrait[PersistentReport, PersistentGraph]("tutorial.PersistentGr
     assert(g3 == "tuesday_08-abigail")
     assert(g4 == "monday_22-abraham")
     assert(g5 == "monday_18-antonia")
+  }
+
+  it should "export into JSON" in {
+    val json = assignedStudents.take(3).toJson.toString
+    assert(json ==
+      """[""" +
+      """{"userid":0,"userfield":"assigned_group","value":"monday_20-alec"},""" +
+      """{"userid":1000,"userfield":"assigned_group","value":"monday_18-antonia"},""" +
+      """{"userid":2000,"userfield":"assigned_group","value":"tuesday_08-abigail"}]""")
   }
 
   // test whether persistence works by pre-assigning first 4 students,
@@ -47,5 +63,15 @@ extends GraphSpecTrait[PersistentReport, PersistentGraph]("tutorial.PersistentGr
     assert(newReport.formatAssignedGroup(2) == Some("monday_12-aiden"   ))
     assert(newReport.formatAssignedGroup(3) == Some("monday_22-adelaide"))
     assert(newReport.formatAssignedGroup(4) == Some("monday_22-adelaide"))
+  }
+
+  it should "not export students with valid pre-assignment" in {
+    assert(newlyAssigned.find(_.id == fst.id) == None)
+    assert(newlyAssigned.find(_.id == snd.id) == None)
+  }
+
+  it should "export students without valid pre-assignment" in {
+    assert(newlyAssigned.find(_.id == trd.id) != None)
+    assert(newlyAssigned.find(_.id == fth.id) != None)
   }
 }

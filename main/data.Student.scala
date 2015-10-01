@@ -34,7 +34,7 @@ object Student extends DefaultJsonProtocol {
 
   implicit object StudentFormat extends RootJsonFormat[Student] {
     def write(s: Student): JsValue =
-      s.toFields.toVector.map(FieldFormat.write).toJson
+      FieldFormat.write(s.toField)
 
     // don't care about preference,
     // consider first choice as important as third choice
@@ -86,11 +86,9 @@ case class Student(
 ) {
   import Student._
 
-  def toFields: collection.GenTraversable[Student.Field] =
-    assignedGroup.map {
-      case v =>
-        Field(userid = id, userfield = Field.assigned_group, value = v)
-    }
+  // defined only if assignedGroup != None
+  def toField: Student.Field =
+    Field(userid = id, userfield = Field.assigned_group, value = assignedGroup.get)
 
   // if assignedGroup == None, then slot == tutor == None
   //
