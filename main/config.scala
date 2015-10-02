@@ -3,23 +3,16 @@ import spray.json._
 
 package object config {
   // fields obtained by reading config files
+  import DefaultJsonProtocol._
 
-  // CAUTION: need to change this if current semester is not WS2015!!!
-  // consider separate config file for file names?
-  val rooms = {
-    import DefaultJsonProtocol._
-    secretJson[Map[String, Vector[String]]]("rooms-ws2015.json")
-  }
+  // the magic file containing the names of other files
+  val config = baseJson[Map[String, String]]("config.json")
 
-  val credential = {
-    import DefaultJsonProtocol._
-    secretJson[Map[String, String]]("credential.json")
-  }
+  val rooms = baseJson[Map[String, Vector[String]]](config("rooms"))
 
-  val List(assigned_group, assigned_at) = {
-    import DefaultJsonProtocol._
-    secretJson[List[String]]("assigned_at.json")
-  }
+  val credential = baseJson[Map[String, String]](config("credential"))
+
+  val List(assigned_group, assigned_at) = baseJson[List[String]](config("assigned_at"))
 
   // other fields in alphabetic order, are defs due to interdependency
   def apiKey        = ("api_key", credential("api_key"))
@@ -44,24 +37,19 @@ package object config {
 
   // helper functions
 
-  // read a json file from the secret directory
-  def secretJson[T: JsonReader](filename: String): T =
-    fromJsonFile(secretFile(filename))
-
   // read a json file from the data directory
   def dataJson[T: JsonReader](filename: String): T =
-    fromJsonFile(dataFile(filename))
+    fromJsonFile[T](dataFile(filename))
 
   def fromJsonFile[T: JsonReader](file: File): T =
     io.Source.fromFile(file).mkString.parseJson.convertTo[T]
 
+  def baseJson[T: JsonReader](path: String): T =
+    fromJsonFile[T](baseFile(path))
+
   // address a file in the base directory
   def baseFile(relativePath: String): File =
     new File(getClass.getResource("").getPath, s"../../../../$relativePath")
-
-  // address a file in the secret directory
-  def secretFile(relativePath: String): File =
-    baseFile(s"scheduler-secret/$relativePath")
 
   // address a file in the data directory
   def dataFile(relativePath: String): File =
@@ -71,7 +59,7 @@ package object config {
   def checked(s: String): Boolean = s.nonEmpty
 
   def appendApiKey(url: String): String =
-    url + s"?${config.apiKey._1}=${config.apiKey._2}"
+    url + s"?${apiKey._1}=${apiKey._2}"
 
   // dump url with api key appended
   def dumpWithApiKey: String = appendApiKey(dump)

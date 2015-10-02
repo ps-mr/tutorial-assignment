@@ -1,0 +1,5 @@
+{
+  "rooms"       : "scheduler-secret/rooms-ws2015.json",
+  "credential"  : "scheduler-secret/credential.json",
+  "assigned_at" : "scheduler-secret/assigned_at.json"
+}
