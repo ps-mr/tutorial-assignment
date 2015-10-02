@@ -1,20 +1,9 @@
 package data
 
 import java.io.File
+import config.{datafile, getFirstInt}
 
 object Rooms {
-  def datafile(relativePath: String): File =
-    new File(getClass.getResource("").getPath, s"../../../../data/$relativePath")
-
-  def getFirstInt(string: String): Int = {
-    val start = string.indexWhere(_.isDigit)
-    val end   = {
-      val endIndex = string.indexWhere(! _.isDigit, start)
-      if (endIndex < 0) string.length else endIndex
-    }
-    string.substring(start, end).toInt
-  }
-
   lazy val dummy: Rooms = fromFile(datafile("rooms-dummy.txt"))
 
   def fromFile(file: File): Rooms = {

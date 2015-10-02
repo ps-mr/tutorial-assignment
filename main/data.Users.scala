@@ -2,18 +2,13 @@ package data
 
 import spray.json._
 import java.io.File
-import Rooms.{datafile, getFirstInt} // extract?
+import config.{datafile, getFirstInt}
 
 object Users {
-  /** configurable field names */
-  object Field {
-    val users = "users"
-  }
-
   def fromJson(jsonCode: String): Users = new Users({
-    def error() = deserializationError(s"""expect {"${Field.users}":[ students... ]}""")
+    def error() = deserializationError(s"""expect {"${config.users}":[ students... ]}""")
     jsonCode.parseJson match {
-      case JsObject(fields) => fields(Field.users) match {
+      case JsObject(fields) => fields(config.users) match {
         case JsArray(elements) =>
           elements.map(_.convertTo[Student])
 
@@ -71,7 +66,7 @@ class Users(_students: Seq[Student]) {
 
   // subclasses should override this if the mapping to group names is different
   protected[this]
-  def getGroupName(): IndexedSeq[String] = Student.Field.timeslots
+  def getGroupName(): IndexedSeq[String] = config.timeslots
 
   val groupName   : IndexedSeq[String]   = getGroupName()
   val groupRank   : Map[String, Int]     = groupName.zipWithIndex.toMap

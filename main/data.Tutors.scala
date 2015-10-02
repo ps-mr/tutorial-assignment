@@ -1,7 +1,7 @@
 package data
 
 import java.io.File
-import Rooms.{datafile, getFirstInt} // todo: abstract?
+import config.{datafile, getFirstInt}
 
 object Tutors {
   lazy val dummy: Tutors = fromFile(datafile("tutors-dummy.txt"))

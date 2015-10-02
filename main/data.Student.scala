@@ -1,8 +1,7 @@
 package data
 
 import spray.json._
-import remote.Forum.secretJson
-import remote.Forum.credential.{truth, checked}
+import config.{secretJson, truth, checked}
 
 object Student extends DefaultJsonProtocol {
   /** output case class */
@@ -10,18 +9,7 @@ object Student extends DefaultJsonProtocol {
 
   /** configurable field names */
   object Field {
-    val id = "id"
-    val name = "name"
-    val username = "username"
-    val email = "email"
-    lazy val timeslots = secretJson[Vector[String]]("timeslots.json")
-    lazy val List(assigned_group, assigned_at) = secretJson[List[String]]("assigned_at.json")
-
-    val (userid, userfield, value) = {
-      import remote.Forum.credential.{userid => i, userfield => f, value => v}
-      (i, f, v)
-    }
-
+    import config._
     implicit object FieldFormat extends RootJsonWriter[Field] {
       def write(f: Field): JsValue =
         JsObject(Map[String, JsValue](
@@ -34,12 +22,12 @@ object Student extends DefaultJsonProtocol {
   implicit object StudentFormat extends RootJsonFormat[Student] {
     def write(s: Student): JsValue =
       JsObject(Map[String, JsValue](
-        (  Field.id             -> JsNumber(s.id)) +:
-          (Field.username       -> s.username.toJson) +:
-          (Field.name           -> s.name.toJson) +:
-          (Field.email          -> s.email.toJson) +:
-          (Field.assigned_group -> s.assignedGroup.toJson) +:
-          Field.timeslots.zip(s.availability.map {
+        (  config.id             -> JsNumber(s.id)) +:
+          (config.username       -> s.username.toJson) +:
+          (config.name           -> s.name.toJson) +:
+          (config.email          -> s.email.toJson) +:
+          (config.assigned_group -> s.assignedGroup.toJson) +:
+          config.timeslots.zip(s.availability.map {
             case true  => JsString(truth)
             case false => JsNull
           }): _*))
@@ -49,7 +37,7 @@ object Student extends DefaultJsonProtocol {
     def read(value: JsValue): Student =
       value match {
         case JsObject(field) =>
-          import Field._
+          import config._
 
           Student(
             id = field(id).convertTo[Int],
@@ -95,7 +83,7 @@ case class Student(
   import Student._
 
   def toFields: Seq[Student.Field] =
-    Seq(Field(userid = id, userfield = Field.assigned_group, value = assignedGroup.get))
+    Seq(Field(userid = id, userfield = config.assigned_group, value = assignedGroup.get))
 
   // if assignedGroup == None, then slot == tutor == None
   //
