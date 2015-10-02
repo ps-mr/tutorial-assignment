@@ -1,29 +1,23 @@
 package data
 
 import java.io.File
-import config.{datafile, getFirstInt}
+import config.{dataFile, getFirstInt}
+import spray.json._
+import DefaultJsonProtocol._
 
 object Rooms {
-  lazy val dummy: Rooms = fromFile(datafile("rooms-dummy.txt"))
+  lazy val dummy: Rooms = fromFile(dataFile("rooms-dummy.txt"))
 
-  def fromFile(file: File): Rooms = {
-    val line = io.Source.fromFile(file).getLines()
-
-    val numberOfSlots = getFirstInt(line.next)
-    val numberOfRooms = getFirstInt(line.next)
-
-    val slotNames = collection.mutable.MutableList.empty[String]
-
-    val roomNames: IndexedSeq[Seq[String]] = Range(0, numberOfSlots).map { _ =>
-      val Array(slotName, rest) = line.next.split(':')
-      slotNames += slotName.trim
-      rest.trim.split(",\\s*"): Seq[String]
-    }
-
-    val roomsPerSlot: IndexedSeq[Int] = roomNames.map(_.size)
-
-    Rooms(slotNames.toVector, roomNames, roomsPerSlot)
+  def fromMap(jsObj: Map[String, Vector[String]]): Rooms = {
+    val slotNames = jsObj(config.timeslots)
+    val roomNames: IndexedSeq[Seq[String]] = slotNames.map(jsObj)
+    val roomsPerSlot = roomNames.map(_.size)
+    Rooms(slotNames, roomNames, roomsPerSlot)
   }
+
+  def fromFile(file: File): Rooms =
+    // type annotation mandatory
+    fromMap(config.fromJsonFile[Map[String, Vector[String]]](file))
 }
 
 case class Rooms (

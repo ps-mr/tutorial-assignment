@@ -1,10 +1,10 @@
 package data
 
 import java.io.File
-import config.{datafile, getFirstInt}
+import config.{dataFile, getFirstInt}
 
 object Tutors {
-  lazy val dummy: Tutors = fromFile(datafile("tutors-dummy.txt"))
+  lazy val dummy: Tutors = fromFile(dataFile("tutors-dummy.txt"))
 
   def splitAtEachTab(string: String): Seq[String] = splitAtEach('\t', string)
 

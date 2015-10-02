@@ -1,7 +1,7 @@
 package data
 
 import spray.json._
-import config.{secretJson, truth, checked}
+import config.{truth, checked}
 
 object Student extends DefaultJsonProtocol {
   /** output case class */
@@ -27,7 +27,7 @@ object Student extends DefaultJsonProtocol {
           (config.name           -> s.name.toJson) +:
           (config.email          -> s.email.toJson) +:
           (config.assigned_group -> s.assignedGroup.toJson) +:
-          config.timeslots.zip(s.availability.map {
+          config.slotNames.zip(s.availability.map {
             case true  => JsString(truth)
             case false => JsNull
           }): _*))
@@ -55,7 +55,7 @@ object Student extends DefaultJsonProtocol {
             assignedGroup = field(assigned_group).convertTo[Option[String]],
 
             availability = for {
-              slot   <- timeslots
+              slot   <- slotNames
               result <- field.get(slot)
             }
             yield result match {

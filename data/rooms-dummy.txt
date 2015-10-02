@@ -1,11 +1,16 @@
-   9 time slots
-  40 rooms
-monday_08: A B, C, D, E
-monday_10: E F, G, H, I, J
-monday_12: K L, M, N, O, P, Q R
-monday_14: S T
-monday_16: U V
-monday_18: W, X, Y, Z
-monday_20: A, B, C, D, E
-monday_22: F, G, H, I, J, K, L
-tuesday_08: M, N, O, P, W, R, S
+{
+  "timeslots": [
+     "monday_08", "monday_10", "monday_12", "monday_14",
+     "monday_16", "monday_18", "monday_20", "monday_22",
+     "tuesday_08"
+  ],
+  "monday_08": ["A B", "C", "D", "E"],
+  "monday_10": ["E F", "G", "H", "I", "J" ],
+  "monday_12": ["K L", "M", "N", "O", "P", "Q R"],
+  "monday_14": ["S T"],
+  "monday_16": ["U V"],
+  "monday_18": ["W", "X", "Y", "Z"],
+  "monday_20": ["A", "B", "C", "D", "E"],
+  "monday_22": ["F", "G", "H", "I", "J", "K", "L"],
+  "tuesday_08": ["M", "N", "O", "P", "W", "R", "S"]
+}

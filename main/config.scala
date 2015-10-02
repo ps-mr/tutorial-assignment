@@ -1,18 +1,71 @@
 import java.io.File
 import spray.json._
-import DefaultJsonProtocol._
 
 package object config {
-  // read a json file from the secret directory
-  def secretJson[T: JsonReader](filename: String): T = {
-    val secretDir = "scheduler-secret"
-    val file = new java.io.File(getClass.getResource("").getPath, s"../../../../$secretDir/$filename")
-    io.Source.fromFile(file).mkString.parseJson.convertTo[T]
+  // fields obtained by reading config files
+
+  // CAUTION: need to change this if current semester is not WS2015!!!
+  // consider separate config file for file names?
+  val rooms = {
+    import DefaultJsonProtocol._
+    secretJson[Map[String, Vector[String]]]("rooms-ws2015.json")
   }
 
+  val credential = {
+    import DefaultJsonProtocol._
+    secretJson[Map[String, String]]("credential.json")
+  }
+
+  val List(assigned_group, assigned_at) = {
+    import DefaultJsonProtocol._
+    secretJson[List[String]]("assigned_at.json")
+  }
+
+  // other fields in alphabetic order, are defs due to interdependency
+  def apiKey        = ("api_key", credential("api_key"))
+  def dataKey       = "data"
+  def dump          = credential("dump")
+  def email         = "email"
+  def error         = "error"
+  def id            = "id"
+  def name          = "name"
+  def setUserField  = credential("set_user_field")
+  def setUserFields = credential("set_user_fields")
+  def slotNames     = rooms(timeslots)
+  def success       = "success"
+  def timeslots     = "timeslots"
+  def truth         = "true"
+  def userid        = "userid"
+  def userfield     = "userfield"
+  def username      = "username"
+  def users         = "users"
+  def value         = "value"
+
+
+  // helper functions
+
+  // read a json file from the secret directory
+  def secretJson[T: JsonReader](filename: String): T =
+    fromJsonFile(secretFile(filename))
+
+  // read a json file from the data directory
+  def dataJson[T: JsonReader](filename: String): T =
+    fromJsonFile(dataFile(filename))
+
+  def fromJsonFile[T: JsonReader](file: File): T =
+    io.Source.fromFile(file).mkString.parseJson.convertTo[T]
+
+  // address a file in the base directory
+  def baseFile(relativePath: String): File =
+    new File(getClass.getResource("").getPath, s"../../../../$relativePath")
+
+  // address a file in the secret directory
+  def secretFile(relativePath: String): File =
+    baseFile(s"scheduler-secret/$relativePath")
+
   // address a file in the data directory
-  def datafile(relativePath: String): File =
-    new File(getClass.getResource("").getPath, s"../../../../data/$relativePath")
+  def dataFile(relativePath: String): File =
+    baseFile(s"data/$relativePath")
 
   // whether a checkbox is checked or not
   def checked(s: String): Boolean = s.nonEmpty
@@ -32,28 +85,4 @@ package object config {
     }
     string.substring(start, end).toInt
   }
-
-  // this comes first because other fields depends on it
-  val credential = secretJson[Map[String, String]]("credential.json")
-
-  // other fields sorted in alphabetic order
-  val List(assigned_group, assigned_at) = secretJson[List[String]]("assigned_at.json")
-
-  val apiKey        = ("api_key", credential("api_key"))
-  val dataKey       = "data"
-  val dump          = credential("dump")
-  val email         = "email"
-  val error         = "error"
-  val id            = "id"
-  val name          = "name"
-  val setUserField  = credential("set_user_field")
-  val setUserFields = credential("set_user_fields")
-  val success       = "success"
-  val timeslots     = secretJson[Vector[String]]("timeslots.json")
-  val truth         = "true"
-  val userid        = "userid"
-  val userfield     = "userfield"
-  val username      = "username"
-  val users         = "users"
-  val value         = "value"
 }

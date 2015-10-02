@@ -2,7 +2,7 @@ package data
 
 import spray.json._
 import java.io.File
-import config.{datafile, getFirstInt}
+import config.{dataFile, getFirstInt}
 
 object Users {
   def fromJson(jsonCode: String): Users = new Users({
@@ -19,7 +19,7 @@ object Users {
     }
   })
 
-  lazy val year2014: Users = fromFile(datafile("group-prefs-2014.txt"))
+  lazy val year2014: Users = fromFile(dataFile("group-prefs-2014.txt"))
 
   def fromFile(file: File): Users = {
     val line     = io.Source.fromFile(file).getLines
@@ -66,7 +66,7 @@ class Users(_students: Seq[Student]) {
 
   // subclasses should override this if the mapping to group names is different
   protected[this]
-  def getGroupName(): IndexedSeq[String] = config.timeslots
+  def getGroupName(): IndexedSeq[String] = config.slotNames
 
   val groupName   : IndexedSeq[String]   = getGroupName()
   val groupRank   : Map[String, Int]     = groupName.zipWithIndex.toMap
