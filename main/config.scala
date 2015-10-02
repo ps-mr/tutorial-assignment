@@ -21,6 +21,7 @@ package object config {
   def email         = "email"
   def error         = "error"
   def id            = "id"
+  def listFields    = credential("list_fields")
   def name          = "name"
   def setUserField  = credential("set_user_field")
   def setUserFields = credential("set_user_fields")
@@ -30,6 +31,7 @@ package object config {
   def truth         = "true"
   def userid        = "userid"
   def userfield     = "userfield"
+  def user_fields   = "user_fields"
   def username      = "username"
   def users         = "users"
   def value         = "value"
@@ -60,9 +62,6 @@ package object config {
 
   def appendApiKey(url: String): String =
     url + s"?${apiKey._1}=${apiKey._2}"
-
-  // dump url with api key appended
-  def dumpWithApiKey: String = appendApiKey(dump)
 
   // extract first integer occuring in a string
   def getFirstInt(string: String): Int = {

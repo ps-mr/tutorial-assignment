@@ -6,9 +6,15 @@ import spray.json._
 import DefaultJsonProtocol._
 
 object Forum {
-  def dump: String = {
+  def dump: String = download(config.dump)
+
+  // download field names together with ids from the forum
+  lazy val fieldNames: data.FieldNames =
+    download(config.listFields).parseJson.convertTo[data.FieldNames]
+
+  def download(url: String): String = {
     val response: HttpResponse[String] =
-      Http(config.dumpWithApiKey).asString
+      Http(config.appendApiKey(url)).asString
 
     if (response.isError)
       sys error response.toString
