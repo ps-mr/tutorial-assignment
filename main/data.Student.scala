@@ -94,11 +94,8 @@ case class Student(
 ) {
   import Student._
 
-  // defined only if assignedGroup != None
-  def toField: Student.Field =
-    Field(userid = id, userfield = Field.assigned_group, value = assignedGroup.get)
-
-  def exportJson: JsValue = toField.toJson
+  def toFields: Seq[Student.Field] =
+    Seq(Field(userid = id, userfield = Field.assigned_group, value = assignedGroup.get))
 
   // if assignedGroup == None, then slot == tutor == None
   //
