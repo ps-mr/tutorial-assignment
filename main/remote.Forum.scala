@@ -6,18 +6,29 @@ import spray.json._
 import DefaultJsonProtocol._
 
 object Forum {
+  // dump list of students using Discourse-course plugin
   def dump: String = download(config.dump)
 
   // download field names together with ids from the forum
   lazy val fieldNames: data.FieldNames =
     download(config.listFields).parseJson.convertTo[data.FieldNames]
 
+  lazy val fieldIds: Map[String, Int] = fieldNames.get.map(_.swap)
+
+  // download the user's fields from Discourse
+  def showUser(username: String): String =
+    download(config.showUser + username.toLowerCase + config.dotJson)
+
   def download(url: String): String = {
     val response: HttpResponse[String] =
       Http(config.appendApiKey(url)).asString
 
-    if (response.isError)
-      sys error response.toString
+    if (response.code == 429 /* too many requests */) {
+      Thread.sleep(100)      /* sleep 0.1 sec     */
+        this.download(url)   /* try again         */
+    }
+    else if (response.isError)
+      sys error (url + "\n" + response.toString)
     else
       response.body
   }
@@ -64,4 +75,5 @@ object Forum {
   }
 
   def getUsers(): Users = Users.fromJson(dump)
+  def getStaff(): Staff = Staff.fromJson(download(config.listStaff))
 }

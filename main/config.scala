@@ -17,14 +17,17 @@ package object config {
   // other fields in alphabetic order, are defs due to interdependency
   def apiKey        = ("api_key", credential("api_key"))
   def dataKey       = "data"
+  def dotJson       = ".json"
   def dump          = credential("dump")
   def email         = "email"
   def error         = "error"
   def id            = "id"
   def listFields    = credential("list_fields")
+  def listStaff     = credential("list_staff")
   def name          = "name"
   def setUserField  = credential("set_user_field")
   def setUserFields = credential("set_user_fields")
+  def showUser      = credential("show_user")
   def slotNames     = rooms(timeslots)
   def success       = "success"
   def timeslots     = "timeslots"
