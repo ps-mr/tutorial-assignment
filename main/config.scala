@@ -21,6 +21,7 @@ package object config {
   def dump          = credential("dump")
   def email         = "email"
   def error         = "error"
+  def groups        = "groups"
   def id            = "id"
   def listFields    = credential("list_fields")
   def listStaff     = credential("list_staff")
@@ -32,6 +33,7 @@ package object config {
   def success       = "success"
   def timeslots     = "timeslots"
   def truth         = "true"
+  def tutors        = "tutors"
   def userid        = "userid"
   def userfield     = "userfield"
   def user_fields   = "user_fields"

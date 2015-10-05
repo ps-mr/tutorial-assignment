@@ -8,7 +8,8 @@ import util.jsOps._
 // tutor's time availability downloaded from Discourse
 
 object Staff {
-  def fromJson(jsonCode: String): Staff = {
+  // use Discourse API to obtain json of tutors
+  def fromRemote(jsonCode: String): Staff = {
     import DefaultJsonProtocol._
     // download field names and ids from the forum
     val fieldIds = remote.Forum.fieldIds
@@ -21,6 +22,12 @@ object Staff {
 
         // download the user's fields
         user = remote.Forum.showUser(username).parseJson.asObject
+
+        // make sure it's a tutor
+        // unfortunately, must download individual user data to see
+        // whether a staff is a tutor.
+        groups = user(config.groups).convertTo[Seq[Map[String, JsValue]]]
+        if groups.find(_(config.name) == config.tutors.toJson) != None
 
         name = user(config.name).asString
         fields = user(config.user_fields).asObject

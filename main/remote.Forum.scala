@@ -75,5 +75,5 @@ object Forum {
   }
 
   def getUsers(): Users = Users.fromJson(dump)
-  def getStaff(): Staff = Staff.fromJson(download(config.listStaff))
+  def getStaff(): Staff = Staff.fromRemote(download(config.listStaff))
 }
