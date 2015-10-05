@@ -1,5 +1,9 @@
 {
+  "rooms and tutors change every semester" : "comment",
   "rooms"       : "scheduler-secret/rooms-ws2015.json",
+  "tutors"      : "scheduler-secret/tutors-ws2015.json",
+
+  "credential and assigned_at are relatively invariant across semesters" : "comment",
   "credential"  : "scheduler-secret/credential.json",
   "assigned_at" : "scheduler-secret/assigned_at.json"
 }

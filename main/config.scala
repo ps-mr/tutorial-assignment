@@ -34,6 +34,7 @@ package object config {
   def timeslots     = "timeslots"
   def truth         = "true"
   def tutors        = "tutors"
+  def tutorsFile    = config("tutors")
   def userid        = "userid"
   def userfield     = "userfield"
   def user_fields   = "user_fields"
