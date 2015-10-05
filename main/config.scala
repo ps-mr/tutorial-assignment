@@ -6,13 +6,14 @@ package object config {
   import DefaultJsonProtocol._
 
   // the magic file containing the names of other files
-  val config = baseJson[Map[String, String]]("config.json")
+  // make them lazy vals to do IO as little as possible
+  lazy val config = baseJson[Map[String, String]]("config.json")
 
-  val rooms = baseJson[Map[String, Vector[String]]](config("rooms"))
+  lazy val rooms = baseJson[Map[String, Vector[String]]](config("rooms"))
 
-  val credential = baseJson[Map[String, String]](config("credential"))
+  lazy val credential = baseJson[Map[String, String]](config("credential"))
 
-  val List(assigned_group, assigned_at) = baseJson[List[String]](config("assigned_at"))
+  lazy val List(assigned_group, assigned_at) = baseJson[List[String]](config("assigned_at"))
 
   // other fields in alphabetic order, are defs due to interdependency
   def apiKey        = ("api_key", credential("api_key"))
