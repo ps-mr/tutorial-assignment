@@ -45,6 +45,24 @@ object Tutors {
       usernames    = usernames.toVector,
       availability = tutorAvailability)
   }
+
+  // convert students to tutors
+  def fromStudents(students: Seq[Student]): Tutors = {
+    val slotNames    = config.slotNames
+    val tutors       = students.toVector
+    val tutorNames   = tutors.map(_.name)
+    val usernames    = tutors.map(_.username)
+    val availability = tutors.map(s => translateStudentAvailability(s.availability))
+    Tutors(
+      slotNames    = slotNames,
+      tutorNames   = tutorNames,
+      usernames    = usernames,
+      availability = availability)
+  }
+
+  // convert student availability to tutor availability
+  def translateStudentAvailability(avail: Seq[Boolean]): Seq[Int] =
+    Range(0, avail.length).filter(avail)
 }
 
 case class Tutors (

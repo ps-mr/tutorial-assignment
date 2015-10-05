@@ -65,7 +65,8 @@ object Staff {
 
 
 case class Staff(users: Users) {
-  def toTutors: Tutors = ??? // TODO
+  def toTutors: Tutors =
+    Tutors.fromStudents(users.validStudents)
 
   // save tutor availability info in file
   // TODO: consistency checking and warn-on-change manual process

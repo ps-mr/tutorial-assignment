@@ -8,6 +8,8 @@ import DefaultJsonProtocol._
 object Rooms {
   lazy val dummy: Rooms = fromFile(dataFile("rooms-dummy.txt"))
 
+  lazy val current: Rooms = fromMap(config.rooms)
+
   def fromMap(jsObj: Map[String, Vector[String]]): Rooms = {
     val slotNames = jsObj(config.timeslots)
     val roomNames: IndexedSeq[Seq[String]] = slotNames.map(jsObj)
@@ -20,7 +22,7 @@ object Rooms {
     fromMap(config.fromJsonFile[Map[String, Vector[String]]](file))
 }
 
-case class Rooms (
+case class Rooms(
   slotNames: IndexedSeq[String],
   roomNames: IndexedSeq[Seq[String]],
   roomsPerSlot: IndexedSeq[Int]
