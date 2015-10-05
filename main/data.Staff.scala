@@ -61,6 +61,17 @@ object Staff {
     def read(value: JsValue): Staff =
       Staff(new Users(value.convertTo[Seq[Student]]))
   }
+
+  def lastSaved(): Staff =
+    config.baseJson[Staff](config.tutorsFile)
+
+  sealed trait Conflict { def get: Student }
+
+  // username is different. we ask tutor to change it back, regardless of availability.
+  case class UsernameChange(old: Student, get: Student) extends Conflict
+
+  // availability is different. we reschedule the tutor.
+  case class AvailabilityChange(old: Student, get: Student) extends Conflict
 }
 
 
@@ -76,5 +87,39 @@ case class Staff(users: Users) {
     val path = config.baseFile(config.tutorsFile)
     val code = this.toJson.prettyPrint
     Files.write(Paths.get(path.toURI), code.getBytes(StandardCharsets.UTF_8))
+  }
+
+  def conflict(that: Staff): (Seq[Staff.UsernameChange], Seq[Staff.AvailabilityChange]) = {
+    import Staff._
+
+    val conflicts =
+      for {
+        s <- that.users.validStudents
+        t <- this.users.validStudents
+        //this.users.validStudents.flatMap {
+        r <- {
+          if (t.id == s.id) {
+            if (t.username != s.username)
+              Some(UsernameChange(s, t))
+            else if (t.availability != s.availability)
+              Some(AvailabilityChange(s, t))
+            else
+              None
+          }
+          else
+            None
+        }
+      }
+      yield r
+
+    val usernameChanges =
+      for { s <- conflicts ; if s.isInstanceOf[UsernameChange] }
+      yield s.asInstanceOf[UsernameChange]
+
+    val availabilityChanges =
+      for { s <- conflicts ; if s.isInstanceOf[AvailabilityChange] }
+      yield s.asInstanceOf[AvailabilityChange]
+
+    (usernameChanges, availabilityChanges)
   }
 }
