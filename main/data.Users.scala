@@ -78,4 +78,8 @@ class Users(_students: Seq[Student]) {
     validStudents.map(_.availability.zipWithIndex.withFilter(_._1).map(_._2))(breakOut)
   def groups      : Int                  = groupName.length
   def numberOfValidStudents : Int        = preferences.length
+
+  // reassign all students
+  def discardAssignment(): Users =
+    new Users(dumpedStudents.map(_.copy(assignedGroup = None)))
 }

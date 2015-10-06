@@ -65,19 +65,37 @@ object Staff {
   def lastSaved(): Staff =
     config.baseJson[Staff](config.tutorsFile)
 
-  sealed trait Conflict { def get: Student }
+  sealed trait Conflict
 
   // username is different. we ask tutor to change it back, regardless of availability.
-  case class UsernameChange(old: Student, get: Student) extends Conflict
+  case class UsernameChange(prev: Student, next: Student) extends Conflict
 
   // availability is different. we reschedule the tutor.
-  case class AvailabilityChange(old: Student, get: Student) extends Conflict
+  case class AvailabilityChange(prev: Student, next: Student) extends Conflict
+
+  // insertion and deletion
+  sealed trait IndelConflict extends Conflict {
+    def get: Student
+    def format: String = f"  ${get.id}%3d  ${get.username}"
+  }
+
+  case class Insertion(get: Student) extends IndelConflict
+  case class Deletion (get: Student) extends IndelConflict
 }
 
 
 case class Staff(users: Users) {
   def toTutors: Tutors =
     Tutors.fromStudents(users.validStudents)
+
+  def getTutor(index: Int): Student =
+    users.validStudents(index)
+
+  def contains(tutor: Student): Boolean =
+    getUpdated(tutor) != None
+
+  def getUpdated(tutor: Student): Option[Student] =
+    users.validStudents.find(_.id == tutor.id)
 
   // save tutor availability info in file
   // TODO: consistency checking and warn-on-change manual process
@@ -89,7 +107,13 @@ case class Staff(users: Users) {
     Files.write(Paths.get(path.toURI), code.getBytes(StandardCharsets.UTF_8))
   }
 
-  def conflict(that: Staff): (Seq[Staff.UsernameChange], Seq[Staff.AvailabilityChange]) = {
+  def conflict(that: Staff):
+      ( Seq[Staff.UsernameChange],
+        Seq[Staff.AvailabilityChange],
+        Seq[Staff.Insertion],
+        Seq[Staff.Deletion]
+      ) =
+  {
     import Staff._
 
     val conflicts =
@@ -120,6 +144,20 @@ case class Staff(users: Users) {
       for { s <- conflicts ; if s.isInstanceOf[AvailabilityChange] }
       yield s.asInstanceOf[AvailabilityChange]
 
-    (usernameChanges, availabilityChanges)
+    val insertions =
+      for {
+        t <- that.users.validStudents
+        if this.users.validStudents.find(_.id == t.id) == None
+      }
+      yield Insertion(t)
+
+    val deletions =
+      for {
+        s <- this.users.validStudents
+        if that.users.validStudents.find(_.id == s.id) == None
+      }
+      yield Deletion(s)
+
+    (usernameChanges, availabilityChanges, insertions, deletions)
   }
 }

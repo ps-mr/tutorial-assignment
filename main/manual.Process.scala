@@ -40,6 +40,21 @@ trait Process[+A] {
     val elapsed = (end - start) / 1000.0
     (result, elapsed)
   }
+
+  // verify a situation with user, fail unless user says yes
+  def checkWithUser(question: String): Unit = {
+    print(s"$question (y/n) ")
+    Console.flush()
+    val line = scala.io.StdIn.readLine()
+    if (line.startsWith("y") || line.startsWith("Y"))
+      ()
+    else if (line.startsWith("n") || line.startsWith("N"))
+      throw Process.Fail("Manual process cancelled by user.")
+    else {
+      println("Please answer yes or no.")
+      checkWithUser(question)
+    }
+  }
 }
 
 object Process {
