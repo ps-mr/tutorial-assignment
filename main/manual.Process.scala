@@ -13,6 +13,14 @@ trait Process[+A] {
   def map[B](f: A => B): Process[B] =
     Process.Bind(this, (x: A) => Process.Return(f(x)))
 
+  // ignore filter results
+  def withFilter(f: A => Any): Process[A] =
+    for {
+      res <- this
+      ignored = f(res)
+    }
+    yield res
+
   // failure
   def fail(message: String): Nothing =
     throw Process.Fail(message)
@@ -74,7 +82,10 @@ object Process {
   }
 
   case class Bind[A, +B](prev: Process[A], next: A => Process[B]) extends Process[B] {
-    def run(): B = next(prev.run()).run()
+    def run(): B = {
+      val res = prev.run()
+      next(res).run
+    }
   }
 
   case class Fail(message: String) extends Exception(message) with Process[Nothing] {

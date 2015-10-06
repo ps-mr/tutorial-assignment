@@ -8,8 +8,15 @@ package manual
   * availability, or thei existence of their accounts.
   *
   * Run it with sensible integrity check:
-  *
-  * manual.Process.execute(manual.DownloadTutors(remote.Forum.getUsers))
+
+  manual.Process.execute {
+    for {
+      students        <- manual.DumpStudents
+      (staff, tutors) <- manual.DownloadTutors(students)
+    }
+    yield ()
+  }
+
   */
 
 import data._
@@ -18,8 +25,8 @@ object DownloadTutors extends (Users => DownloadTutors) {
   def apply(students: Users): DownloadTutors = new DownloadTutors(students)
 }
 
-class DownloadTutors(students: Users) extends Process[Tutors] {
-  def run(): Tutors = {
+class DownloadTutors(students: Users) extends Process[(Staff, Tutors)] {
+  def run(): (Staff, Tutors) = {
     val cached  = reportTime(s"Reading ${config.tutorsFile}") { Staff.lastSaved() }
     val current = reportTime("Downloading tutors from forum") { remote.Forum.getStaff() }
 
@@ -28,7 +35,7 @@ class DownloadTutors(students: Users) extends Process[Tutors] {
 
     if (oldTutors == newTutors) {
       println(s"The cache ${config.tutorsFile} is up to date.")
-      newTutors
+      (current, newTutors)
     }
     else if (oldTutors.slotNames != newTutors.slotNames)
       fail("""|Time slots changed.
@@ -98,7 +105,7 @@ class DownloadTutors(students: Users) extends Process[Tutors] {
         }
 
         reportTime(s"\nSaving ${config.tutorsFile}") { current.saveToFile() }
-        newTutors
+        (current, newTutors)
       }
       else
         internalError("Tutors' availability changed without being detected by Staff.conflict.")

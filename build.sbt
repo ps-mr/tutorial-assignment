@@ -1,6 +1,6 @@
 scalaVersion := "2.11.7"
 
-scalacOptions := List("-feature")
+scalacOptions := List("-feature", "-deprecation")
 
 scalaSource in Compile := baseDirectory.value / "main"
 
