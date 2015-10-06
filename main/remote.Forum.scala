@@ -19,18 +19,20 @@ object Forum {
   def showUser(username: String): String =
     download(config.showUser + username.toLowerCase + config.dotJson)
 
-  def download(url: String): String = {
-    val response: HttpResponse[String] =
-      Http(config.appendApiKey(url)).asString
+  def download(url: String): String =
+      keepTrying(Http(config.appendApiKey(url))).body
+
+  def keepTrying(http: HttpRequest): HttpResponse[String] = {
+    val response: HttpResponse[String] = http.asString
 
     if (response.code == 429 /* too many requests */) {
       Thread.sleep(100)      /* sleep 0.1 sec     */
-        this.download(url)   /* try again         */
+        this.keepTrying(http)/* try again         */
     }
     else if (response.isError)
-      sys error (url + "\n" + response.toString)
+      sys error response.toString
     else
-      response.body
+      response
   }
 
   implicit class HttpOps(http: HttpRequest) {
@@ -48,6 +50,8 @@ object Forum {
     expectTruth(putJson(config.setUserFields, json))
   }
 
+  // set user field by discourse-course plugin
+  // only work on unprivileged users
   def setUserField(userid: Int, key: String, value: String): Unit =
     expectTruth(
       Http(config.setUserField).postForm(
@@ -60,16 +64,34 @@ object Forum {
       ).doPut
     )
 
-  def expectTruth(request: HttpRequest): Unit = {
-    val response = request.asString
+  // the hard-core way of setting a user field
+  // works on everything; bugs here are dangerous.
+  def setUserFieldByUsername(username: String, key: String, value: String): Unit =
+    expectOK(
+      Http(s"${config.usersURL}/$username.json").postForm(
+        Seq(
+          config.apiKey,
+          s"${config.user_fields}[${fieldIds(key)}]" -> value
+        )
+      ).doPut
+    )
+
+  def expectTruth(request: HttpRequest): Unit =
+    expect(JsBoolean(true))(request)
+
+  def expectOK(request: HttpRequest): Unit =
+    expect(JsString("OK"))(request)
+
+  def expect(expected: JsValue)(request: HttpRequest): Unit = {
+    val response = keepTrying(request)
     if (response.isError)
       sys error response.toString
     else {
       import DefaultJsonProtocol._
       val map = response.body.parseJson.convertTo[JsValue].asJsObject
       map.fields.get(config.success) match {
-        case Some(JsBoolean(true)) => ()
-        case _                     => sys error map.prettyPrint
+        case Some(actual) if actual == expected => ()
+        case _ => sys error map.prettyPrint
       }
     }
   }
