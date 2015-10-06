@@ -30,6 +30,24 @@ object Main extends App {
         newlyAssigned.flatMap(_.toFields)
       }
 
+      warnAboutUnassignedStudentsAndTutors = {
+        if (report.unassignedTutors.nonEmpty) {
+          println("\nWARNING: The following tutors are unassigned:")
+          println(
+            report.unassignedTutors.
+              map(staff.users.validStudents).
+              map(_.formatIdUsername).mkString("\n"))
+        }
+
+        if (report.unassignedStudents.nonEmpty) {
+          println("\nWARNING: The following students are unassigned:")
+          println(
+            report.unassignedStudents.
+              map(students.validStudents).
+              map(_.formatIdUsername).mkString("\n"))
+        }
+      }
+
       // ask whether to display new assignment to upload
       displayFullReport = Process.chooseByUser("\nDisplay the JSON to be uploaded?") {
         println(fieldsToUpload.map("  " + _.toJson).mkString("\n"))

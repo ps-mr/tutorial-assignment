@@ -76,7 +76,7 @@ object Staff {
   // insertion and deletion
   sealed trait IndelConflict extends Conflict {
     def get: Student
-    def format: String = f"  ${get.id}%3d  ${get.username}"
+    def format: String = get.formatIdUsername
   }
 
   case class Insertion(get: Student) extends IndelConflict

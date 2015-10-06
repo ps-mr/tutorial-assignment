@@ -121,4 +121,6 @@ case class Student(
 
   def isAssigned(tutors: Tutors): Boolean =
     slotIndex(tutors).nonEmpty && tutorIndex(tutors).nonEmpty
+
+  def formatIdUsername: String = f"  $id%3d  $username"
 }
