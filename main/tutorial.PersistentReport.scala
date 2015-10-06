@@ -64,10 +64,45 @@ extends Report(graph, flow) {
     }
     yield studentData.copy(assignedGroup = Some(group))
 
+  // generate values of "assigned_group" such as "tuesday_08-alex"
   def formatAssignedGroup(student: Int): Option[String] =
     for {
       slot <- slotOfStudent(student)
       tutor = tutorOfStudent(student)
     }
     yield tutorData.formatSlotTutor(slot, tutor)
+
+  // generate human-readable tutorial appointment such as:
+  //   Zeit:  Dienstag, 08.00 Uhr
+  //   Ort:   Raum VB N3, Morgenstelle
+  //   Tutor: ivan_the_terrible
+  def formatAssignedGroupForHuman(student: Int): Option[String] =
+    for {
+      slot <- slotOfStudent(student)
+      tutor = tutorOfStudent(student)
+
+      // stupidly assign the ith room to the ith tutor
+      // this may bite us if some tutor weren't scheduled in the first run
+      room = roomData.roomNames(slot)(tutorsOfSlot(slot).indexOf(tutor))
+
+      slotName = roomData.slotNames(slot)
+    }
+    yield s"""|Zeit:  ${util.WeekdayTranslator.germanTimeslot(slotName)}
+              |Ort:   ${config.roomPrefix}$room${config.roomSuffix}
+              |Tutor: ${tutorData.usernames(tutor)}""".stripMargin
+
+  def getSlotRoom(student: Int): Option[(String, String)] =
+    for {
+      slot <- slotOfStudent(student)
+      tutor = tutorOfStudent(student)
+
+      // stupidly assign the ith room to the ith tutor
+      // this may bite us if some tutor weren't scheduled in the first run
+      room = roomData.roomNames(slot)(tutorsOfSlot(slot).indexOf(tutor))
+
+      slotName = roomData.slotNames(slot)
+    }
+    yield (
+      util.WeekdayTranslator.germanTimeslot(slotName),
+      s"${config.roomPrefix}$room${config.roomSuffix}" )
 }

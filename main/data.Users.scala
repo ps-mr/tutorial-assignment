@@ -60,9 +60,10 @@ class Users(_students: Seq[Student]) {
   val dumpedStudents: Seq[Student] = _students
 
   // no sense scheduling students without any available slot
-  val validStudents : Seq[Student] = _students.filter {
-    s => s.availability.nonEmpty && s.availability.max
-  }
+  val (validStudents, invalidStudents) : (Seq[Student], Seq[Student]) =
+    _students.partition {
+      s => s.availability.nonEmpty && s.availability.max
+    }
 
   // subclasses should override this if the mapping to group names is different
   protected[this]

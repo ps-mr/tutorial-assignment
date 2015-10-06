@@ -27,6 +27,8 @@ object Student extends DefaultJsonProtocol {
           (config.name           -> s.name.toJson) +:
           (config.email          -> s.email.toJson) +:
           (config.assigned_group -> s.assignedGroup.toJson) +:
+          (config.assignedGroupForHuman -> s.assignedGroupForHuman.toJson) +:
+          (config.user_fields -> s.userFields.toJson) +:
           config.slotNames.zip(s.availability.map {
             case true  => JsString(truth)
             case false => JsNull
@@ -62,7 +64,13 @@ object Student extends DefaultJsonProtocol {
               case JsString(s) => checked(s)
               case JsNull      => false
               case _           => deserializationError("tutorial choice must be a string or NULL")
-            }
+            },
+
+            assignedGroupForHuman =
+              field.get(assignedGroupForHuman).flatMap(_.convertTo[Option[String]]),
+
+            userFields =
+              field.get(user_fields).map(_.convertTo[Map[String, Option[String]]])
           )
 
         case _ =>
@@ -78,12 +86,17 @@ case class Student(
   name: String,
   email: String,
   availability: Seq[Boolean],
-  assignedGroup: Option[String] = None
+  assignedGroup: Option[String] = None,
+  assignedGroupForHuman: Option[String] = None,
+  userFields: Option[Map[String, Option[String]]] = None
 ) {
   import Student._
 
   def toFields: Seq[Student.Field] =
     Seq(Field(userid = id, userfield = config.assigned_group, value = assignedGroup.get))
+
+  def toFieldForHuman: Student.Field =
+    Field(userid = id, userfield = config.assignedGroupForHuman, value = assignedGroupForHuman.get)
 
   // if assignedGroup == None, then slot == tutor == None
   //

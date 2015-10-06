@@ -49,14 +49,23 @@ object Main extends App {
       }
 
       // ask whether to display new assignment to upload
-      displayFullReport = Process.chooseByUser("\nDisplay the JSON to be uploaded?") {
-        println(fieldsToUpload.map("  " + _.toJson).mkString("\n"))
-      } { () }
+      displayFullReport = if (fieldsToUpload.nonEmpty) {
+        Process.chooseByUser("\nDisplay the JSON to be uploaded?") {
+          println(fieldsToUpload.map("  " + _.toJson).mkString("\n"))
+        } { () }
+      }
 
-      // upload assignment
-      uploadAssignment <- new UploadAssignment(fieldsToUpload)
+      // upload assignment, abort if disagreed
+      uploadAssignment <- if (fieldsToUpload.nonEmpty) {
+        new UploadAssignment(fieldsToUpload)
+      }
+      else {
+        println("No change in student assignment.")
+        Process.Return(())
+      }
 
-      // TODO: after adding display field, update that in a separate setUserFields.
+      // update the human-readable version of assigned_group
+      updateForHuman <- new UpdateForHuman(students, staff, tutors, report)
     }
     yield ()
   }

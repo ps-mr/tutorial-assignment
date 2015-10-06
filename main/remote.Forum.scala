@@ -66,12 +66,17 @@ object Forum {
 
   // the hard-core way of setting a user field
   // works on everything; bugs here are dangerous.
-  def setUserFieldByUsername(username: String, key: String, value: String): Unit =
+  // =============================================
+  // CAUTION:
+  // NEVER set user_fields[21]=whatever.
+  // This sets every other field to null.
+  // =============================================
+  def setUserFieldsByUsername(username: String, value: String): Unit =
     expectOK(
       Http(s"${config.usersURL}/$username.json").postForm(
         Seq(
           config.apiKey,
-          s"${config.user_fields}[${fieldIds(key)}]" -> value
+          config.user_fields -> value
         )
       ).doPut
     )
@@ -98,4 +103,16 @@ object Forum {
 
   def getUsers(): Users = Users.fromJson(dump)
   def getStaff(): Staff = Staff.fromRemote(download(config.listStaff))
+
+  // restore tutors' availability from cached file
+  // a life-saver when Discourse decides it's okay to replace
+  // user fields wholesale
+  def restoreStaffAvailability(staff: Staff): Unit =
+    staff.users.validStudents.foreach {
+      case tutor =>
+        val slots = config.slotNames.zip(tutor.availability).withFilter(_._2).map(_._1)
+        val keys = slots.map(fieldIds)
+        val map = Map(keys.map(id => (id.toString, config.truth)): _*).toJson
+        setUserFieldsByUsername(tutor.username, map.toString)
+    }
 }

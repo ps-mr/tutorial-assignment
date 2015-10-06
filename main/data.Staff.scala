@@ -30,14 +30,17 @@ object Staff {
         if groups.find(_(config.name) == config.tutors.toJson) != None
 
         name = user(config.name).asString
-        fields = user(config.user_fields).asObject
+        fields = user(config.user_fields).convertTo[Map[String, Option[String]]]
         availability = config.slotNames.map {
           case slot =>
-            fields(fieldIds(slot).toString).convertTo[Option[String]] match {
+            fields(fieldIds(slot).toString) match {
               case None => false
               case Some(answer) => config.checked(answer)
             }
         }
+
+        assignedGroup = fields(fieldIds(config.assigned_group).toString)
+        assignedGroupForHuman = fields(fieldIds(config.assignedGroupForHuman).toString)
       }
       yield Student(
         id            = id,
@@ -45,7 +48,9 @@ object Staff {
         name          = name,
         email         = "", // some tutors don't have emails
         availability  = availability,
-        assignedGroup = None
+        assignedGroup = assignedGroup,
+        assignedGroupForHuman = assignedGroupForHuman,
+        userFields = Some(fields)
       )
 
     Staff(new Users(tutors))

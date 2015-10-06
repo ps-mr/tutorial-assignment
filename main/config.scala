@@ -18,6 +18,7 @@ package object config {
   lazy val parameters = baseJson[Map[String, Vector[Int]]](config("parameters"))
 
   // other fields in alphabetic order, are defs due to interdependency
+  def assignedGroupForHuman = config("assigned_group_for_human")
   def apiKey        = ("api_key", credential("api_key"))
   def configFile    = "config.json"
   def dataKey       = "data"
@@ -32,6 +33,8 @@ package object config {
   def marginal_rank = "marginal_rank"
   def marginal_cost = "marginal_cost"
   def name          = "name"
+  def roomPrefix    = rooms("affixes").head
+  def roomSuffix    = rooms("affixes").last
   def setUserField  = credential("set_user_field")
   def setUserFields = credential("set_user_fields")
   def showUser      = credential("show_user")
@@ -42,11 +45,13 @@ package object config {
   def tutors        = "tutors"
   def tutorsFile    = config("tutors")
   def unassigned_penalty = "unassigned_penalty"
+  def unassignedForHuman = "Keins"
   def userid        = "userid"
   def userfield     = "userfield"
   def user_fields   = "user_fields"
   def username      = "username"
   def users         = "users"
+  def usersURL      = credential("usersURL")
   def value         = "value"
 
 

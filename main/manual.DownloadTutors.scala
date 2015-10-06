@@ -45,7 +45,8 @@ class DownloadTutors(students: Users) extends Process[(Staff, Tutors)] {
     val newTutors = current.toTutors
 
     if (oldTutors == newTutors) {
-      println(s"The cache ${config.tutorsFile} is up to date.")
+      println(s"The availability info in ${config.tutorsFile} is up to date.")
+      reportTime(s"Saving user fields in ${config.tutorsFile}") { current.saveToFile() }
       (current, newTutors)
     }
     else if (oldTutors.slotNames != newTutors.slotNames)

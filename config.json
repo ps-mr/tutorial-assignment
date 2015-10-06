@@ -8,5 +8,8 @@
   "assigned_at" : "scheduler-secret/assigned_at.json",
 
   "optimization parameters" : "comment",
-  "parameters"  : "scheduler-secret/parameters.json"
+  "parameters"  : "scheduler-secret/parameters.json",
+
+  "Discourse field to display to humans. Maybe merge scheduler-secret/assigned_at.json?" : "comment",
+  "assigned_group_for_human" : "Tutoriumstermin"
 }
