@@ -2,7 +2,6 @@ package minCostFlow
 
 import org.scalatest._
 
-class RelaxationSpec     extends SolverSpec(Relaxation)
 class IntegerProgramSpec extends SolverSpec(IntegerProgram)
 
 abstract class SolverSpec(solver: Solver) extends FlatSpec {
