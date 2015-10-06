@@ -93,7 +93,10 @@ case class Student(
     assignedGroup match {
       case Some(code) =>
         val (s, _t) = code.span(_ != '-')
-        (Some(s), Some(_t.tail))
+        if (_t.nonEmpty)
+          (Some(s), Some(_t.tail))
+        else
+          (None, None) // wrong format
       case None =>
         (None, None)
     }

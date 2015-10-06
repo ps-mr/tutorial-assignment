@@ -7,7 +7,7 @@ package object config {
 
   // the magic file containing the names of other files
   // make them lazy vals to do IO as little as possible
-  lazy val config = baseJson[Map[String, String]]("config.json")
+  lazy val config = baseJson[Map[String, String]](configFile)
 
   lazy val rooms = baseJson[Map[String, Vector[String]]](config("rooms"))
 
@@ -15,8 +15,11 @@ package object config {
 
   lazy val List(assigned_group, assigned_at) = baseJson[List[String]](config("assigned_at"))
 
+  lazy val parameters = baseJson[Map[String, Vector[Int]]](config("parameters"))
+
   // other fields in alphabetic order, are defs due to interdependency
   def apiKey        = ("api_key", credential("api_key"))
+  def configFile    = "config.json"
   def dataKey       = "data"
   def dotJson       = ".json"
   def dump          = credential("dump")
@@ -26,6 +29,8 @@ package object config {
   def id            = "id"
   def listFields    = credential("list_fields")
   def listStaff     = credential("list_staff")
+  def marginal_rank = "marginal_rank"
+  def marginal_cost = "marginal_cost"
   def name          = "name"
   def setUserField  = credential("set_user_field")
   def setUserFields = credential("set_user_fields")
@@ -36,6 +41,7 @@ package object config {
   def truth         = "true"
   def tutors        = "tutors"
   def tutorsFile    = config("tutors")
+  def unassigned_penalty = "unassigned_penalty"
   def userid        = "userid"
   def userfield     = "userfield"
   def user_fields   = "user_fields"

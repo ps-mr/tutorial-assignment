@@ -20,6 +20,7 @@ package manual
   */
 
 import data._
+import Process._
 
 object DownloadTutors extends (Users => DownloadTutors) {
   def apply(students: Users): DownloadTutors = new DownloadTutors(students)
@@ -27,7 +28,17 @@ object DownloadTutors extends (Users => DownloadTutors) {
 
 class DownloadTutors(students: Users) extends Process[(Staff, Tutors)] {
   def run(): (Staff, Tutors) = {
-    val cached  = reportTime(s"Reading ${config.tutorsFile}") { Staff.lastSaved() }
+    val cached: Staff = reportTime(s"Reading ${config.tutorsFile}") {
+      try {
+        Staff.lastSaved()
+      }
+      catch {
+        case e: java.io.FileNotFoundException =>
+          setDone("not found")
+          new Staff(new Users(Seq.empty))
+      }
+    }
+
     val current = reportTime("Downloading tutors from forum") { remote.Forum.getStaff() }
 
     val oldTutors = cached.toTutors

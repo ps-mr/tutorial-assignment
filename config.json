@@ -5,5 +5,8 @@
 
   "credential and assigned_at are relatively invariant across semesters" : "comment",
   "credential"  : "scheduler-secret/credential.json",
-  "assigned_at" : "scheduler-secret/assigned_at.json"
+  "assigned_at" : "scheduler-secret/assigned_at.json",
+
+  "optimization parameters" : "comment",
+  "parameters"  : "scheduler-secret/parameters.json"
 }

@@ -108,7 +108,7 @@ class Report(val graph: Graph, val flow: Flow) {
         ( rooms.slotNames(slot),
           tutorsAndRoomNames.zipped.map {
             case (tutor, room) =>
-              ( tutors.tutorNames(tutor)
+              ( tutors.usernames(tutor)
               , room
               , studentsOfTutor(tutor).map(i => students(i).username).toList.sorted
               )
@@ -116,16 +116,19 @@ class Report(val graph: Graph, val flow: Flow) {
         )
     }
 
-  def forHuman(rooms: data.Rooms, tutors: data.Tutors, students: Seq[data.Student]): String =
-    tutorsOfSlotForHuman(rooms, tutors, students).flatMap({
+  def formatForHuman(tutorsOfSlot: Seq[(String, Seq[(String, String, Seq[String])])]): String =
+    tutorsOfSlot.flatMap({
       case (slot, tutorRoomStudents) =>
         //s"\n$slot:" +:
         for {
           (tutor, room, students) <- tutorRoomStudents
         }
         yield {
-          f"\n$slot%12s in $room%4s is $tutor" +
-          s"\n  ${students.mkString(",")}"
+          f"$slot%12s in $room%4s is $tutor\n" +
+          s"  ${students.mkString(",")}\n"
         }
     }).mkString("\n")
+
+  def forHuman(rooms: data.Rooms, tutors: data.Tutors, students: Seq[data.Student]): String =
+    formatForHuman(tutorsOfSlotForHuman(rooms, tutors, students))
 }

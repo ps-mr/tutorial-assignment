@@ -30,16 +30,22 @@ trait Process[+A] {
     throw Process.Fail(s"Scheduler internal error:\n$message")
 
   // timing report
-  private[this] def now(): Long =
+  protected[this] def now(): Long =
     java.util.Calendar.getInstance.getTimeInMillis
 
   def reportTime[A](description: String)(job: => A): A = {
     print(s"$description...")
     Console.flush()
     val (result, elapsed) = timing(job)
-    println(f"done. ($elapsed%.2f s)")
+    println(f"$done%s. ($elapsed%.2f s)")
+    resetDone()
     result
   }
+
+  // set the "done" message within one cycle of `reportTime`
+  private[this] var done = "done"
+  def resetDone(): Unit = { done = "done" }
+  def setDone(msg: String): Unit = { done = msg }
 
   def timing[A](job: => A): (A, Double) = {
     val start   = now()
@@ -47,21 +53,6 @@ trait Process[+A] {
     val end     = now()
     val elapsed = (end - start) / 1000.0
     (result, elapsed)
-  }
-
-  // verify a situation with user, fail unless user says yes
-  def checkWithUser(question: String): Unit = {
-    print(s"$question (y/n) ")
-    Console.flush()
-    val line = scala.io.StdIn.readLine()
-    if (line.startsWith("y") || line.startsWith("Y"))
-      ()
-    else if (line.startsWith("n") || line.startsWith("N"))
-      throw Process.Fail("Manual process cancelled by user.")
-    else {
-      println("Please answer yes or no.")
-      checkWithUser(question)
-    }
   }
 }
 
@@ -90,5 +81,23 @@ object Process {
 
   case class Fail(message: String) extends Exception(message) with Process[Nothing] {
     def run(): Nothing = throw this
+  }
+
+  // verify a situation with user, fail unless user says yes
+  def checkWithUser(question: String): Unit =
+    chooseByUser(question)( () )( throw Process.Fail("Manual process cancelled by user.") )
+
+  def chooseByUser[A](question: String)(thenBranch: => A)(elseBranch: => A): A = {
+    print(s"$question (y/n) ")
+    Console.flush()
+    val line = scala.io.StdIn.readLine()
+    if (line.startsWith("y") || line.startsWith("Y"))
+      thenBranch
+    else if (line.startsWith("n") || line.startsWith("N"))
+      elseBranch
+    else {
+      println("Please answer yes or no.")
+      chooseByUser(question)(thenBranch)(elseBranch)
+    }
   }
 }
