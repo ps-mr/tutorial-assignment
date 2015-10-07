@@ -72,15 +72,23 @@ class PersistentGraph(
           }
           yield flow(e) := 1
 
-        val tutorConstraints =
+        val tutorConstraints = {
+          val buffer = collection.mutable.Map.empty[Int, Int].withDefault(_ => 0)
           for {
-            (e, i) <- activationEdges.zipWithIndex
-            tutorIndex    = tutors.indexOf(getTarget(e, edges))
-            expectedSlot <- tutorToSlot.get(tutorIndex)
-            actualSlot    = slots.indexOf(getSource(e, edges))
-            if expectedSlot == actualSlot
+            e <- edgeIndices
+            actualSlot  = slots.indexOf(getSource(e, edges))
+            actualTutor = tutors.indexOf(getTarget(e, edges))
+            (student, (expectedSlot, expectedTutor)) <- preassigned
+            if expectedSlot == actualSlot && expectedTutor == actualTutor
+          } {
+            buffer(e) += 1
           }
-          yield activation(i) >= 1 // forces tutor-timeslot assignment
+
+          buffer.map {
+            case (edge, preassignedFlow) =>
+              flow(edge) >= preassignedFlow
+          }
+        }
 
         studentConstraints ++ tutorConstraints
     }

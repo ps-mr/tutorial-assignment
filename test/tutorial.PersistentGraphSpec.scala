@@ -58,11 +58,6 @@ extends GraphSpecTrait[PersistentReport, PersistentGraph]("tutorial.PersistentGr
   it should "persist valid pre-assignments" in {
     assert(newReport.formatAssignedGroup(0) == Some("monday_08-ashton"  ))
     assert(newReport.formatAssignedGroup(1) == Some("monday_20-atticus" ))
-
-    // these are solver-dependent
-    assert(newReport.formatAssignedGroup(2) == Some("monday_12-aiden"   ))
-    assert(newReport.formatAssignedGroup(3) == Some("monday_22-adelaide"))
-    assert(newReport.formatAssignedGroup(4) == Some("monday_22-adelaide"))
   }
 
   it should "not export students with valid pre-assignment" in {
