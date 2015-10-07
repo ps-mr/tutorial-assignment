@@ -90,7 +90,7 @@ class DownloadTutors(students: Users) extends Process[(Staff, Tutors)] {
 
         if (invalidConstraints.nonEmpty)
           fail(
-            "The following group assignments are invalidated:\n" +
+            s"The following ${invalidConstraints.size} group assignments are invalidated:\n" +
             invalidConstraints.map({
               case s =>
                 f"  student id=${s.id}%4d user=${s.username}%s assigned ${s.assignedGroup}%s"
@@ -98,13 +98,13 @@ class DownloadTutors(students: Users) extends Process[(Staff, Tutors)] {
 
 
         if (deletions.nonEmpty) {
-          println("The following tutors are deleted:")
+          println(s"The following ${deletions.size} tutors are deleted:")
           println(deletions.map(_.format).mkString("\n"))
           checkWithUser("Is it okay to delete them?")
         }
 
         if (insertions.nonEmpty) {
-          println("\nThe following tutors are added:")
+          println(s"\nThe following ${insertions.size} tutors are added:")
           println(insertions.map(_.format).mkString("\n"))
           checkWithUser("Is it okay to add them?")
         }
@@ -112,7 +112,8 @@ class DownloadTutors(students: Users) extends Process[(Staff, Tutors)] {
         // everything's fine, save tutor cache and proceed
         // print tutors with changed availabilities for information
         if (availabilityChanges.nonEmpty) {
-          println("\nThe following tutors changed their availability without causing conflict:")
+          println(s"\nThe following ${availabilityChanges.size} tutors" +
+            "changed their availability without causing conflict:")
           println(availabilityChanges.map("  " + _.next.username).mkString("\n"))
         }
 

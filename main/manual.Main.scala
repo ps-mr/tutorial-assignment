@@ -32,7 +32,7 @@ object Main extends App {
 
       warnAboutUnassignedStudentsAndTutors = {
         if (report.unassignedTutors.nonEmpty) {
-          println("\nWARNING: The following tutors are unassigned:")
+          println(s"\nWARNING: The following ${report.unassignedTutors.size} tutors are unassigned:")
           println(
             report.unassignedTutors.
               map(staff.users.validStudents).
@@ -40,7 +40,7 @@ object Main extends App {
         }
 
         if (report.unassignedStudents.nonEmpty) {
-          println("\nWARNING: The following students are unassigned:")
+          println(s"\nWARNING: The following ${report.unassignedStudents.size} students are unassigned:")
           println(
             report.unassignedStudents.
               map(students.validStudents).
@@ -52,6 +52,7 @@ object Main extends App {
       displayFullReport = if (fieldsToUpload.nonEmpty) {
         Process.chooseByUser("\nDisplay the JSON to be uploaded?") {
           println(fieldsToUpload.map("  " + _.toJson).mkString("\n"))
+          println()
         } { () }
       }
 
