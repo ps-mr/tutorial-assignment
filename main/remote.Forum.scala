@@ -64,13 +64,18 @@ object Forum {
       ).doPut
     )
 
-  // the hard-core way of setting a user field
-  // works on everything; bugs here are dangerous.
+  // The hard-core way of setting a user field.
+  // It doesn't work so well; don't know whether
+  // it's the fault of me, of spray.json, or of
+  // Discourse. Try to keep it private and use it
+  // only in an emergency via
+  //   this.restoreStaffAvailability().
   // =============================================
   // CAUTION:
   // NEVER set user_fields[21]=whatever.
   // This sets every other field to null.
   // =============================================
+  private[this]
   def setUserFieldsByUsername(username: String, value: String): Unit =
     expectOK(
       Http(s"${config.usersURL}/$username.json").postForm(
