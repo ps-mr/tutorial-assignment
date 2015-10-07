@@ -28,7 +28,6 @@ object Student extends DefaultJsonProtocol {
           (config.email          -> s.email.toJson) +:
           (config.assigned_group -> s.assignedGroup.toJson) +:
           (config.assignedGroupForHuman -> s.assignedGroupForHuman.toJson) +:
-          (config.user_fields -> s.userFields.toJson) +:
           config.slotNames.zip(s.availability.map {
             case true  => JsString(truth)
             case false => JsNull
@@ -67,10 +66,7 @@ object Student extends DefaultJsonProtocol {
             },
 
             assignedGroupForHuman =
-              field.get(assignedGroupForHuman).flatMap(_.convertTo[Option[String]]),
-
-            userFields =
-              field.get(user_fields).map(_.convertTo[Map[String, Option[String]]])
+              field.get(assignedGroupForHuman).flatMap(_.convertTo[Option[String]])
           )
 
         case _ =>
@@ -87,8 +83,7 @@ case class Student(
   email: String,
   availability: Seq[Boolean],
   assignedGroup: Option[String] = None,
-  assignedGroupForHuman: Option[String] = None,
-  userFields: Option[Map[String, Option[String]]] = None
+  assignedGroupForHuman: Option[String] = None
 ) {
   import Student._
 

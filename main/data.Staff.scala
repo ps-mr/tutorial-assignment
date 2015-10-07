@@ -49,8 +49,7 @@ object Staff {
         email         = "", // some tutors don't have emails
         availability  = availability,
         assignedGroup = assignedGroup,
-        assignedGroupForHuman = assignedGroupForHuman,
-        userFields = Some(fields)
+        assignedGroupForHuman = assignedGroupForHuman
       )
 
     Staff(new Users(tutors))
