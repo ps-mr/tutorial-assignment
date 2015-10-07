@@ -14,15 +14,7 @@ class UpdateForHuman(
 {
 
   def run(): Unit = {
-    val invalid = students.invalidStudents
     val valid   = students.validStudents
-
-    val invalidUploads =
-      for {
-        student <- invalid
-        if student.assignedGroupForHuman != Some(config.unassignedForHuman)
-      }
-      yield student.copy(assignedGroupForHuman = Some(config.unassignedForHuman))
 
     val validUploads =
       for {
@@ -35,18 +27,12 @@ class UpdateForHuman(
       }
       yield student.copy(assignedGroupForHuman = Some(ag4human))
 
-    if (invalidUploads.nonEmpty || validUploads.nonEmpty) {
+    if (validUploads.nonEmpty) {
       checkWithUser(s"""The human-readable "${config.assignedGroupForHuman}" changed. Upload changes?""")
 
-      if (invalidUploads.nonEmpty)
-        reportUploadTime(s"${invalidUploads.size} invalid students") {
-          setUserFields(invalidUploads.map(_.toFieldForHuman))
-        }
-
-      if (validUploads.nonEmpty)
-        reportUploadTime(s"${validUploads.size} valid students") {
-          setUserFields(validUploads.map(_.toFieldForHuman))
-        }
+      reportUploadTime(s"${validUploads.size} valid students") {
+        setUserFields(validUploads.map(_.toFieldForHuman))
+      }
     }
 
     val tutorUploads =
@@ -62,9 +48,9 @@ class UpdateForHuman(
             None
       }
 
-      // uploading user field values is too buggy.
-      // I probably destroyed many tutors' Matrikelnummer and Studiengang.
-      // Let's just print their slots and email them the report.
+    // uploading user field values is too buggy.
+    // I probably destroyed many tutors' Matrikelnummer and Studiengang.
+    // Let's just print their slots and email them the report.
     if (tutorUploads.nonEmpty) {
       println("Tutor-room assignments:")
 
