@@ -27,36 +27,46 @@ class UpdateForHuman(
       }
       yield student.copy(assignedGroupForHuman = Some(ag4human))
 
-    if (validUploads.nonEmpty) {
-      checkWithUser(s"""The human-readable "${config.assignedGroupForHuman}" changed. Upload changes?""")
-
-      reportUploadTime(s"${validUploads.size} valid students") {
-        setUserFields(validUploads.map(_.toFieldForHuman))
-      }
-    }
-
     val tutorUploads =
       tutors.usernames.zipWithIndex.flatMap {
         case (username, tutor) =>
           val tutorAsStudent = staff.users.validStudents(tutor)
           val assignedStudents = report.studentsOfTutor(tutor)
           if (assignedStudents.nonEmpty) {
+            // customize what to put in tutor's group assignment field
             val ag4human = report.formatAssignedGroupForHuman(assignedStudents.head).get
-            Some((username, ag4human, tutorAsStudent))
+
+            if (tutorAsStudent.assignedGroupForHuman != Some(ag4human))
+              Some(tutorAsStudent.copy(assignedGroupForHuman = Some(ag4human)))
+            else
+              None
           }
           else
             None
       }
 
-    // uploading user field values is too buggy.
-    // I probably destroyed many tutors' Matrikelnummer and Studiengang.
-    // Let's just print their slots and email them the report.
-    if (tutorUploads.nonEmpty) {
-      println("Tutor-room assignments:")
 
-      tutorUploads.foreach {
-        case (username, value, tutor) =>
-          println("\n" + value + " (forum username)")
+    if (validUploads.nonEmpty || tutorUploads.nonEmpty) {
+      checkWithUser(s"""The human-readable "${config.assignedGroupForHuman}" changed. Upload changes?""")
+
+      if (validUploads.nonEmpty)
+        reportUploadTime(s"${validUploads.size} valid students") {
+          setUserFields(validUploads.map(_.toFieldForHuman))
+        }
+
+      // upload tutor's assignment
+      if (tutorUploads.nonEmpty)
+        reportUploadTime(s"${tutorUploads.size} tutors") {
+          setUserFields(tutorUploads.map(_.toFieldForHuman))
+        }
+
+
+      // save report to file
+      reportTime(s"Writing ${config.assignmentFile}") {
+        val assignmentFileContent =
+          report.forHuman(Rooms.current, tutors, students.validStudents)
+
+        util.writeFile(config.baseFile(config.assignmentFile), assignmentFileContent)
       }
     }
   }

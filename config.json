@@ -3,9 +3,10 @@
   "rooms"       : "scheduler-secret/rooms-ws2015.json",
   "tutors"      : "scheduler-secret/tutors-ws2015.json",
 
-  "credential and assigned_at are relatively invariant across semesters" : "comment",
+  "credential, assigned_at and assignment are relatively invariant across semesters" : "comment",
   "credential"  : "scheduler-secret/credential.json",
   "assigned_at" : "scheduler-secret/assigned_at.json",
+  "assignment"  : "scheduler-secret/assignment.txt",
 
   "optimization parameters" : "comment",
   "parameters"  : "scheduler-secret/parameters.json",

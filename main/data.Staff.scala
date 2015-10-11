@@ -102,13 +102,10 @@ case class Staff(users: Users) {
     users.validStudents.find(_.id == tutor.id)
 
   // save tutor availability info in file
-  // TODO: consistency checking and warn-on-change manual process
   def saveToFile(): Unit = {
-    import java.nio.file.{Paths, Files}
-    import java.nio.charset.StandardCharsets
     val path = config.baseFile(config.tutorsFile)
     val code = this.toJson.prettyPrint
-    Files.write(Paths.get(path.toURI), code.getBytes(StandardCharsets.UTF_8))
+    util.writeFile(path, code)
   }
 
   def conflict(that: Staff):

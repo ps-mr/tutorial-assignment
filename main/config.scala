@@ -19,6 +19,7 @@ package object config {
 
   // other fields in alphabetic order, are defs due to interdependency
   def assignedGroupForHuman = config("assigned_group_for_human")
+  def assignmentFile = config("assignment")
   def apiKey        = ("api_key", credential("api_key"))
   def configFile    = "config.json"
   def dataKey       = "data"
