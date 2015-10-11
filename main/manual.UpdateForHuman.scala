@@ -34,7 +34,7 @@ class UpdateForHuman(
           val assignedStudents = report.studentsOfTutor(tutor)
           if (assignedStudents.nonEmpty) {
             // customize what to put in tutor's group assignment field
-            val ag4human = report.formatAssignedGroupForHuman(assignedStudents.head).get
+            val ag4human = report.formatAssignedGroupForTutorOf(assignedStudents.head).get
 
             if (tutorAsStudent.assignedGroupForHuman != Some(ag4human))
               Some(tutorAsStudent.copy(assignedGroupForHuman = Some(ag4human)))

@@ -91,6 +91,28 @@ extends Report(graph, flow) {
               |Ort:   ${config.roomPrefix}$room${config.roomSuffix}
               |Tutor: ${tutorData.usernames(tutor)}""".stripMargin
 
+  def formatAssignedGroupForTutorOf(student: Int): Option[String] =
+    for {
+      slot <- slotOfStudent(student)
+      tutor = tutorOfStudent(student)
+
+      // stupidly assign the ith room to the ith tutor
+      // this may bite us if some tutor weren't scheduled in the first run
+      room = roomData.roomNames(slot)(tutorsOfSlot(slot).indexOf(tutor))
+      slotName = roomData.slotNames(slot)
+
+      // get all students of tutor and print their usernames
+      // (username is required, name is not)
+      allStudents = studentsOfTutor(tutor).map {
+        case i =>
+          userData.validStudents(i).username
+      }
+    }
+    yield s"""|Zeit:        ${util.WeekdayTranslator.germanTimeslot(slotName)}
+              |Ort:         ${config.roomPrefix}$room${config.roomSuffix}
+              |Studierende: ${allStudents.mkString(", ")}""".stripMargin
+
+
   def getSlotRoom(student: Int): Option[(String, String)] =
     for {
       slot <- slotOfStudent(student)
