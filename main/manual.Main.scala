@@ -47,28 +47,37 @@ object Main extends App {
               map(_.formatIdUsername).mkString("\n"))
         }
       }
-
-      // ask whether to display new assignment to upload
-      displayFullReport = if (fieldsToUpload.nonEmpty) {
-        Process.chooseByUser("\nDisplay the JSON to be uploaded?") {
-          println(fieldsToUpload.map("  " + _.toJson).mkString("\n"))
-          println()
-        } { () }
-      }
-
-      // upload assignment, abort if disagreed
-      uploadAssignment <- if (fieldsToUpload.nonEmpty) {
-        new UploadAssignment(fieldsToUpload)
-      }
-      else {
-        println("No change in student assignment.")
-        Process.Return(())
-      }
-
-      // update the human-readable version of assigned_group
-      updateForHuman <- new UpdateForHuman(students, staff, tutors, report)
     }
-    yield ()
+    yield
+      Process.chooseByUser("\nUpload assignment?\nIf no, I will display assignment and halt.") {
+        // ask whether to display new assignment to upload
+        if (fieldsToUpload.nonEmpty) {
+          Process.chooseByUser("\nDisplay the JSON to be uploaded?") {
+            println(fieldsToUpload.map("  " + _.toJson).mkString("\n"))
+            println()
+          } { () }
+        }
+
+        // upload assignment, abort if disagreed
+        Process.execute {
+          for {
+            uploadAssignment <- if (fieldsToUpload.nonEmpty) {
+              new UploadAssignment(fieldsToUpload)
+            }
+            else {
+              println("No change in student assignment.")
+              Process.Return(())
+            }
+
+            // update the human-readable version of assigned_group
+            updateForHuman <- new UpdateForHuman(students, staff, tutors, report)
+          }
+          yield ()
+        }
+      } {
+        println()
+        println(report.forHuman(data.Rooms.current, tutors, students.validStudents))
+      }
   }
 
 }
