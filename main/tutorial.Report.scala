@@ -124,7 +124,7 @@ class Report(val graph: Graph, val flow: Flow) {
           (tutor, room, students) <- tutorRoomStudents
         }
         yield {
-          f"$slot%12s in $room%4s is $tutor\n" +
+          f"$slot%12s in $room%4s is $tutor with ${students.size} students\n" +
           s"  ${students.mkString(",")}\n"
         }
     }).mkString("\n")
