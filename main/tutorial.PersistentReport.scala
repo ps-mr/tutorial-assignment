@@ -110,7 +110,7 @@ extends Report(graph, flow) {
     }
     yield s"""|Zeit:        ${util.WeekdayTranslator.germanTimeslot(slotName)}
               |Ort:         ${config.roomPrefix}$room${config.roomSuffix}
-              |Studierende: ${allStudents.mkString(", ")}""".stripMargin
+              |Studierende: ${allStudents.toList.sorted.mkString(", ")}""".stripMargin
 
 
   def getSlotRoom(student: Int): Option[(String, String)] =
