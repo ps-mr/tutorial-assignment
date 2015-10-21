@@ -55,14 +55,27 @@ object Student extends DefaultJsonProtocol {
 
             assignedGroup = field(assigned_group).convertTo[Option[String]],
 
-            availability = for {
-              slot   <- slotNames
-              result <- field.get(slot)
-            }
-            yield result match {
-              case JsString(s) => checked(s)
-              case JsNull      => false
-              case _           => deserializationError("tutorial choice must be a string or NULL")
+            availability = {
+              val candidate =
+                for {
+                  slot   <- slotNames
+                  result <- field.get(slot)
+                }
+                yield result match {
+                  case JsString(s) => checked(s)
+                  case JsNull      => false
+                  case _           => deserializationError("tutorial choice must be a string or NULL")
+                }
+
+              field.get(studiengang).flatMap(_.convertTo[Option[String]]) match {
+                case Some(s) if s == medizintechnik =>
+                  field(tuesday_16) match {
+                    case JsString(s) if checked(s) => slotNames.map(_ == tuesday_16)
+                    case _ => candidate
+                  }
+
+                case _ => candidate
+              }
             },
 
             assignedGroupForHuman =

@@ -91,4 +91,11 @@ package object config {
     }
     string.substring(start, end).toInt
   }
+
+
+  // special case for Medizintechniker from Stuttgart
+  // TODO: remove hack
+  val studiengang = "Studiengang"
+  val medizintechnik = "Medizintechnik (Uni Stuttgart)"
+  val tuesday_16 = "tuesday_16"
 }
