@@ -44,7 +44,7 @@ trait Graph {
   {
     import optimus.algebra._
 
-    implicit val problem = MIProblem(SolverLib.gurobi)
+    implicit val problem = MIProblem(SolverLib.lp_solve)
 
     val flow = edgeIndices.map {
       i => MPIntVar("flow" + i, Range(0, capacity(i) + 1))
